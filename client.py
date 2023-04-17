@@ -3,6 +3,7 @@ import sys
 import PySimpleGUI as sg
 from enum import Enum
 import argparse
+import socket
 
 class client :
 
@@ -31,6 +32,14 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def  register(user, window):
+        
+
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
+        server_addres = (client._server, client._port) # Guarda la informacion de IP y puerto
+        connection.connect(server_addres) # Conectamos el socket al servidor
+
+        message = "REGISTER"
+
         window['_SERVER_'].print("s> REGISTER OK")
         #  Write your code here
         return client.RC.ERROR
