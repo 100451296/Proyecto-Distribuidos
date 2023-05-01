@@ -11,6 +11,7 @@
 #include "manage.h"
 
 pthread_mutex_t mutex_socket = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_users = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond_copied = PTHREAD_COND_INITIALIZER;
 int copied = 0;
 int num_users;
@@ -43,25 +44,30 @@ void manage_client(int *sc){
 
         // Trocea la peticion y reinicia buffer
         peticion = split_fields(buffer);
-        
+        pthread_mutex_lock(&mutex_users);
         if (strcmp(peticion[0],"REGISTER") == 0){
                 int i;
 
                 for(i = 0; i < num_users; i++){
-                        if (strcmp(users[i]->username, peticion[REGISTER_USERNAME]) == 0){
+                        if (strcmp(users[i]->username, peticion[REGISTER_USERNAME]) == 0 ||
+                            strcmp(users[i]->alias, peticion[REGISTER_ALIAS]) == 0){
                                 sprintf(buffer, "%d", 1);
-                                printf("pase por aqui (esta)\n");
                                 break;
                         } // Ususario a registrado
+                        printf("user: %s\n", users[i]->username);
                 } 
-                printf("i: %d num: %d", i, num_users);
+        
                 if (i == num_users){
+                        add_user(peticion[REGISTER_USERNAME],
+                                peticion[REGISTER_ALIAS],
+                                peticion[REGISTER_DATE], users, &num_users);
+
                         sprintf(buffer, "%d", 0);
-                        printf("pase por aqui (no esta)\n");
                 } // No se encontro un usuario igual
+
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
         }
-
+        pthread_mutex_unlock(&mutex_users);
         close(sc_copied);
         pthread_exit(0);
 }

@@ -44,8 +44,12 @@ class client :
         message = formatPetition(client.OP_REGISTER, client._username, user, client._date)
         connection.sendall(message.encode("utf-8"))
 
-        print("strinh leido",readString(connection))
-        window['_SERVER_'].print("s> REGISTER OK")
+        result = readString(connection)
+
+        if result == "0":
+            window['_SERVER_'].print("s> REGISTER "+ client._username + " OK")
+        else:
+            window['_SERVER_'].print("s> REGISTER "+ client._username + " FAIL")
         #  Write your code here
         return client.RC.ERROR
 

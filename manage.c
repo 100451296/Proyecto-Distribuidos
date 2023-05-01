@@ -54,7 +54,7 @@ int add_user(const char *new_username, const char *new_alias, const char *new_da
     }
 
     // Write new user to file
-    fprintf(fp, "%s,%s,%s;", new_username, new_alias, new_date);
+    fprintf(fp, "%s,%s,%s;\n", new_username, new_alias, new_date);
 
     fclose(fp);
 

@@ -22,6 +22,9 @@ typedef struct User {
     char *username;
     char *alias;
     char *date;
+    int conected;
+    char *ip;
+    char *port;
 } User;
 
 char **split_fields(char *message);
