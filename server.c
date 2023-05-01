@@ -65,6 +65,20 @@ void manage_client(int *sc){
 
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
         }
+
+        else if (strcmp(peticion[0], "UNREGISTER") == 0){
+                if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 0){
+                        sprintf(buffer, "%d", 1);
+                } // Usuario registrado
+        
+               else{
+                        remove_user(peticion[REGISTER_USERNAME], users, &num_users);
+                        sprintf(buffer, "%d", 0);
+                } // No se encontro un usuario igual
+
+                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+        }
+        
         pthread_mutex_unlock(&mutex_users); // Fin sección critica users
 
         close(sc_copied);

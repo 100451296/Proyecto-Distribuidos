@@ -23,8 +23,10 @@ class client :
     _username = None
     _alias = None
     _date = None
+    _server_addres = None
 
     OP_REGISTER = 'REGISTER'
+    OP_UNREGISTER = 'UNREGISTER'
 
     # ******************** METHODS *******************
     # *
@@ -35,22 +37,21 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def  register(user, window):
-        
 
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
-        server_addres = (client._server, client._port) # Guarda la informacion de IP y puerto
-        connection.connect(server_addres) # Conectamos el socket al servidor
+        connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         message = formatPetition(client.OP_REGISTER, client._username, user, client._date)
         connection.sendall(message.encode("utf-8"))
 
         result = readString(connection)
+        connection.close()
 
         if result == "0":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " OK")
         else:
             window['_SERVER_'].print("s> REGISTER "+ client._username + " FAIL")
-        #  Write your code here
+        
         return client.RC.ERROR
 
     # *
@@ -61,8 +62,21 @@ class client :
     # 	 * @return ERROR if another error occurred
     @staticmethod
     def  unregister(user, window):
-        window['_SERVER_'].print("s> UNREGISTER OK")
-        #  Write your code here
+        
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
+        connection.connect(client._server_addres) # Conectamos el socket al servidor
+
+        message = formatPetition(client.OP_UNREGISTER, client._username, user, client._date)
+        connection.sendall(message.encode("utf-8"))
+
+        result = readString(connection)
+        connection.close()
+
+        if result == "0":
+            window['_SERVER_'].print("s> UNREGISTER "+ client._username + " OK")
+        else:
+            window['_SERVER_'].print("s> UNREGISTER "+ client._username + " FAIL")
+
         return client.RC.ERROR
 
 
@@ -186,6 +200,7 @@ class client :
 
         client._server = args.s
         client._port = args.p
+        client._server_addres = (client._server, client._port) # Guarda la informacion de IP y puerto
 
         return True
 

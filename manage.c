@@ -75,6 +75,50 @@ int add_user(const char *new_username, const char *new_alias, const char *new_da
     }
 }
 
+int remove_user(char* username, User** user_arr, int* num_users) {
+    int found = 0;
+    // Buscar el usuario y eliminarlo de la lista dinámica
+    for (int i = 0; i < *num_users; i++) {
+        if (strcmp(username, user_arr[i]->username) == 0) {
+            free(user_arr[i]->username);
+            free(user_arr[i]->alias);
+            free(user_arr[i]->date);
+            free(user_arr[i]);
+            // Mover los elementos restantes de la lista un espacio hacia atrás
+            for (int j = i; j < *num_users - 1; j++) {
+                user_arr[j] = user_arr[j + 1];
+            }
+            (*num_users)--;
+            found = 1;
+            break;
+        }
+    }
+    // Si se encontró el usuario, actualizar el archivo
+    if (found) {
+        FILE* f = fopen(USERS_PATH, "w");
+        if (f == NULL) {
+            printf("Error opening file!\n");
+            exit(1);
+        }
+        // Escribir los usuarios restantes en el archivo
+        for (int i = 0; i < *num_users; i++) {
+            fprintf(f, "%s,%s,%s", user_arr[i]->username, user_arr[i]->alias, user_arr[i]->date);
+            if (i < *num_users - 1) {
+                fprintf(f, ";");
+            }
+            fprintf(f, "\n");
+        }
+        fclose(f);
+        return 0;
+    }
+    else {
+        printf("User not found.\n");
+        return -1;
+    }
+}
+
+
+
 int registered(const char *username, const char *alias, User **users, int num_users){
     int i;
 

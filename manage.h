@@ -2,6 +2,7 @@
 #define MANAGE
 
 #define USERS_PATH "./files/users.txt"
+#define USERS_TEMP_PATH "./files/tmp_users.txt"
 
 #define DELIM ":;"
 
@@ -33,5 +34,7 @@ User **read_users_from_file(int *num_users);
 int add_user(const char *new_username, const char *new_alias, const char *new_date, User **user_arr, int *num_users);
 void free_user_array(User **user_arr, int num_users);
 int registered(const char *username, const char *alias, User **users, int num_users);
+int remove_user(char *username, User **user_arr, int *num_users);
+
 
 #endif

@@ -1,4 +1,2 @@
 usuario1,alias1,date1;
-usuario2,alias2,date2;
-Tex,Tex,14-05-2023;
-edu,edunavata,14-05-2023;
+edunavata,edu,21-05-2023
