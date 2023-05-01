@@ -75,6 +75,19 @@ int add_user(const char *new_username, const char *new_alias, const char *new_da
     }
 }
 
+int registered(const char *username, const char *alias, User **users, int num_users){
+    int i;
+
+    for(i = 0; i < num_users; i++){
+            if (strcmp(users[i]->username, username) == 0 ||
+                strcmp(users[i]->alias, alias) == 0){
+                    return 1;
+            } 
+    } 
+    
+    return 0;
+}
+
 void free_user_array(User **user_arr, int num_users) {
     for (int i = 0; i < num_users; i++) {
         free(user_arr[i]->username);

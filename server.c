@@ -44,19 +44,18 @@ void manage_client(int *sc){
 
         // Trocea la peticion y reinicia buffer
         peticion = split_fields(buffer);
-        pthread_mutex_lock(&mutex_users);
-        if (strcmp(peticion[0],"REGISTER") == 0){
-                int i;
 
-                for(i = 0; i < num_users; i++){
-                        if (strcmp(users[i]->username, peticion[REGISTER_USERNAME]) == 0 ||
-                            strcmp(users[i]->alias, peticion[REGISTER_ALIAS]) == 0){
-                                sprintf(buffer, "%d", 1);
-                                break;
-                        } // Ususario a registrado
-                } 
+        // Inicio seccion critica para acceder a users
+        pthread_mutex_lock(&mutex_users);
+
+        //Tratamiento peticion REGISTER
+        if (strcmp(peticion[0],"REGISTER") == 0){
+                
+                if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 1){
+                        sprintf(buffer, "%d", 1);
+                } // Usuario registrado
         
-                if (i == num_users){
+               else{
                         add_user(peticion[REGISTER_USERNAME],
                                 peticion[REGISTER_ALIAS],
                                 peticion[REGISTER_DATE], users, &num_users);
@@ -66,7 +65,8 @@ void manage_client(int *sc){
 
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
         }
-        pthread_mutex_unlock(&mutex_users);
+        pthread_mutex_unlock(&mutex_users); // Fin sección critica users
+
         close(sc_copied);
         pthread_exit(0);
 }
