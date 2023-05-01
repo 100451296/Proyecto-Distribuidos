@@ -54,7 +54,6 @@ void manage_client(int *sc){
                                 sprintf(buffer, "%d", 1);
                                 break;
                         } // Ususario a registrado
-                        printf("user: %s\n", users[i]->username);
                 } 
         
                 if (i == num_users){

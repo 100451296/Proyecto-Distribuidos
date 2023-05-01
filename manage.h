@@ -25,6 +25,7 @@ typedef struct User {
     int conected;
     char *ip;
     char *port;
+    char **pending;
 } User;
 
 char **split_fields(char *message);
