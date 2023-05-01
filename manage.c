@@ -103,7 +103,7 @@ int remove_user(char* username, User** user_arr, int* num_users) {
         // Escribir los usuarios restantes en el archivo
         for (int i = 0; i < *num_users; i++) {
             fprintf(f, "%s,%s,%s", user_arr[i]->username, user_arr[i]->alias, user_arr[i]->date);
-            if (i < *num_users - 1) {
+            if (i < *num_users) {
                 fprintf(f, ";");
             }
             fprintf(f, "\n");
