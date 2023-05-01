@@ -4,6 +4,7 @@ import PySimpleGUI as sg
 from enum import Enum
 import argparse
 import socket
+from functions import *
 
 class client :
 
@@ -23,6 +24,8 @@ class client :
     _alias = None
     _date = None
 
+    OP_REGISTER = 'REGISTER'
+
     # ******************** METHODS *******************
     # *
     # * @param user - User name to register in the system
@@ -38,8 +41,10 @@ class client :
         server_addres = (client._server, client._port) # Guarda la informacion de IP y puerto
         connection.connect(server_addres) # Conectamos el socket al servidor
 
-        message = "REGISTER"
+        message = formatPetition(client.OP_REGISTER, client._username, user, client._date)
+        connection.sendall(message.encode("utf-8"))
 
+        print("strinh leido",readString(connection))
         window['_SERVER_'].print("s> REGISTER OK")
         #  Write your code here
         return client.RC.ERROR

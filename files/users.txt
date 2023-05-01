@@ -1,0 +1,2 @@
+usuario1,alias1,date1;
+usuario2,alias2,date2;
