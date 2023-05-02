@@ -1,9 +1,10 @@
 MAX_LINE_LENGHT = 1024
+DELIM = ":;"
 
 import socket
 
 def formatPetition(*args):
-    petition = ":;".join(args)
+    petition = DELIM.join(args)
     petition += "\0"
     return petition
 
