@@ -151,18 +151,31 @@ int connected(char *alias, User **users, int num_users){
     return 0;
 }
 
-int fill_connected(char *alias, char* ip, char *port, User **users, int num_users){
+int fill_connection(char *alias, char* ip, char *port, User **users, int num_users, int mode){
     int i;
 
     for(i = 0; i < num_users; i++){
             if (strcmp(users[i]->alias, alias) == 0){ // Usuario encontrado
-                if (users[i]->connected == CONNECTED)
-                    return 2; // Usuario ya conectado
+                if (users[i]->connected == mode)
+                    return 2; // Usuario ya esta (conectado/desconectado)
                 
                 else{
-                    users[i]->ip = strdup(alias);
-                    users[i]->port = strdup(port);
-                    users[i]->connected = CONNECTED;
+                    if (mode == CONNECTED){ // Queremos conectar al usuario
+                        users[i]->ip = strdup(alias);
+                        users[i]->port = strdup(port);
+                    } // Asginamos ip y port 
+
+                    else{ // Queremos desconectar al usuario
+                    /*
+                        free(users[i]->ip);
+                        users[i]->ip = NULL;
+                        free(users[i]->port);
+                        users[i]->port = NULL;
+                    */
+                    } // Borramos ip y port
+
+                    users[i]->connected = mode; // Le conectamos/desconectamos
+                    
                     return 0; // Caso exito (asigna ip, port y pone a conectado)
                 }
 
@@ -188,6 +201,9 @@ char **split_fields(char *message) {
     // Devuelve un array dinámico con los campos de la peticion (separados por DELIM)
     int num_fields = 0;
     char **fields = NULL;
+
+    if (message == NULL)
+        return NULL;
 
     char *token = strtok(message, DELIM);
     while (token != NULL) {

@@ -32,6 +32,7 @@ class client :
     OP_REGISTER = 'REGISTER'
     OP_UNREGISTER = 'UNREGISTER'
     OP_CONNECT = 'CONNECT'
+    OP_DISCONNECT = 'DISCONNECT'
 
     # ******************** METHODS *******************
     # *
@@ -124,7 +125,6 @@ class client :
 
         message = formatPetition(client.OP_CONNECT, client._alias, str(port))
         
-        
         connection.sendall(message.encode("utf-8"))
 
         result = readString(connection)
@@ -148,9 +148,24 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def  disconnect(user, window):
+
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
+        connection.connect(client._server_addres) # Conectamos el socket al servidor
+
+        message = formatPetition(client.OP_DISCONNECT, client._alias)
+
+        connection.sendall(message.encode("utf-8"))
+
+        result = readString(connection)
+        connection.close()
+
+        if result == "0":
+            window['_SERVER_'].print("s> DISCONNECT " + client._username + " OK")
+        else:
+            window['_SERVER_'].print("s> DISCONNECT " + client._username + " FAIL")
+
         client._connected = False
         client._thread = None
-        window['_SERVER_'].print("s> DISCONNECT OK")
         
         return client.RC.ERROR
     

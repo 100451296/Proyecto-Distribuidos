@@ -42,6 +42,6 @@ void free_user_array(User **user_arr, int num_users);
 int registered(const char *username, const char *alias, User **users, int num_users);
 int remove_user(char *username, User **user_arr, int *num_users);
 int connected(char *alias, User **users, int num_users);
-int fill_connected(char *alias, char* ip, char *port, User **users, int num_users);
+int fill_connection(char *alias, char* ip, char *port, User **users, int num_users, int mode);
 
 #endif

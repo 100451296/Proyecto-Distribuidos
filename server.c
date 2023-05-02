@@ -22,11 +22,11 @@ void manage_client(int *sc){
         int sc_copied;
         char buffer[MAX_LINE_LENGTH];
         char **peticion;
-        char client_ip[INET_ADDRSTRLEN];
+        //char *client_ip;
 
         pthread_mutex_lock(&mutex_socket);
         sc_copied = *sc; 
-        inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN); 
+        //client_ip = strdup(inet_ntoa(client_addr.sin_addr));
         copied = 1;
         pthread_cond_signal(&cond_copied);
         pthread_mutex_unlock(&mutex_socket);
@@ -37,15 +37,23 @@ void manage_client(int *sc){
                 perror("El socket no se pudo abrir correctamente\n");
 	}
 
-        printf("La dirección del cliente es %s\n", client_ip);
 	// Pone la zona de memoria del buffer todo a 0
 	memset(buffer, 0, sizeof(buffer));
 
 	// Realiza la recepción de la petición en el formato esperado
 	recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
 
+        //TO DO: Funcion para comprobar que el formato de la peticion sea valido
+
         // Trocea la peticion y reinicia buffer
         peticion = split_fields(buffer);
+
+        if (peticion == NULL){
+                printf("Se envió un petición vacía");
+                close(sc_copied);
+                pthread_exit(0);
+                
+        }
 
         // Inicio seccion critica para acceder a users
         pthread_mutex_lock(&mutex_users);
@@ -83,7 +91,17 @@ void manage_client(int *sc){
 
         else if (strcmp(peticion[0], "CONNECT") == 0){
                sprintf(buffer, "%d", 
-                fill_connected(peticion[CONNECTED_ALIAS], client_ip, peticion[CONNECTED_PORT], users, num_users));
+                fill_connection(peticion[CONNECTED_ALIAS], NULL, peticion[CONNECTED_PORT], 
+                                users, num_users, CONNECTED));
+                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+
+                // TO DO: Enviar todos los mensajes pendientes 
+        }
+
+        else if (strcmp(peticion[0], "DISCONNECT") == 0){
+               sprintf(buffer, "%d", 
+                fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
+                                users, num_users, DISCONNECTED));
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
         }
 
