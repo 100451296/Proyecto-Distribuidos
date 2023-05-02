@@ -26,12 +26,12 @@ class client :
     _date = None
     _server_addres = None
     _connected = True
-    _socketMessages = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     _thread = None
    
 
     OP_REGISTER = 'REGISTER'
     OP_UNREGISTER = 'UNREGISTER'
+    OP_CONNECT = 'CONNECT'
 
     # ******************** METHODS *******************
     # *
@@ -109,16 +109,33 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def  connect(user, window):
+        socketMessages = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socketMessages.bind(('localhost', 0))
+        host, port = socketMessages.getsockname()
         
-        client._socketMessages.bind(('localhost', 0))
-        host, port = client._socketMessages.getsockname()
-        
-        client._thread = threading.Thread(target=client.recvMessages, args=(client._socketMessages,))
+        if client._thread == None:
+            client._connected = True
+            client._thread = threading.Thread(target=client.recvMessages, args=(socketMessages,))
 
-        client._thread.start()
+            client._thread.start()
+
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
+        connection.connect(client._server_addres) # Conectamos el socket al servidor
+
+        message = formatPetition(client.OP_CONNECT, client._alias, str(port))
         
         
-        window['_SERVER_'].print("s> CONNECT OK")
+        connection.sendall(message.encode("utf-8"))
+
+        result = readString(connection)
+        connection.close()
+
+        if result == "0":
+            window['_SERVER_'].print("s> CONNECT " + client._username + " OK")
+        else:
+            window['_SERVER_'].print("s> CONNECT " + client._username + " FAIL")
+
+
         
         return client.RC.ERROR
 
@@ -132,7 +149,7 @@ class client :
     @staticmethod
     def  disconnect(user, window):
         client._connected = False
-        client._socketMessages.close()
+        client._thread = None
         window['_SERVER_'].print("s> DISCONNECT OK")
         
         return client.RC.ERROR

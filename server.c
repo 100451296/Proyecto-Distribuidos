@@ -16,16 +16,17 @@ pthread_cond_t cond_copied = PTHREAD_COND_INITIALIZER;
 int copied = 0;
 int num_users;
 User **users;
-
+struct sockaddr_in client_addr;
 
 void manage_client(int *sc){
         int sc_copied;
         char buffer[MAX_LINE_LENGTH];
         char **peticion;
-        //int err_thread;
+        char client_ip[INET_ADDRSTRLEN];
 
         pthread_mutex_lock(&mutex_socket);
         sc_copied = *sc; 
+        inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN); 
         copied = 1;
         pthread_cond_signal(&cond_copied);
         pthread_mutex_unlock(&mutex_socket);
@@ -36,6 +37,7 @@ void manage_client(int *sc){
                 perror("El socket no se pudo abrir correctamente\n");
 	}
 
+        printf("La dirección del cliente es %s\n", client_ip);
 	// Pone la zona de memoria del buffer todo a 0
 	memset(buffer, 0, sizeof(buffer));
 
@@ -69,16 +71,22 @@ void manage_client(int *sc){
         else if (strcmp(peticion[0], "UNREGISTER") == 0){
                 if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 0){
                         sprintf(buffer, "%d", 1);
-                } // Usuario registrado
+                } // Usuario no registrado
         
                else{
                         remove_user(peticion[REGISTER_USERNAME], users, &num_users);
                         sprintf(buffer, "%d", 0);
-                } // No se encontro un usuario igual
+                } // Usuario borrado
 
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
         }
-        
+
+        else if (strcmp(peticion[0], "CONNECT") == 0){
+               sprintf(buffer, "%d", 
+                fill_connected(peticion[CONNECTED_ALIAS], client_ip, peticion[CONNECTED_PORT], users, num_users));
+                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+        }
+
         pthread_mutex_unlock(&mutex_users); // Fin sección critica users
 
         close(sc_copied);
@@ -91,7 +99,7 @@ int main(int argc, char *argv[])
         int err;
         int sd, sc;
         socklen_t size;
-        struct sockaddr_in server_addr,  client_addr;
+        struct sockaddr_in server_addr;
         pthread_t thid;
         pthread_attr_t t_attr;
 

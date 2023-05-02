@@ -32,6 +32,7 @@ User **read_users_from_file(int *num_users) {
                 new_user->username = strdup(username);
                 new_user->alias = strdup(alias);
                 new_user->date = strdup(date);
+                new_user->connected = DISCONNECTED;
                 user_arr[i] = new_user;
                 i++;
             }
@@ -63,6 +64,7 @@ int add_user(const char *new_username, const char *new_alias, const char *new_da
     new_user->username = strdup(new_username);
     new_user->alias = strdup(new_alias);
     new_user->date = strdup(new_date);
+    new_user->connected = DISCONNECTED;
 
     if (*num_users < MAX_USERS) {
         user_arr[*num_users] = new_user;
@@ -83,6 +85,9 @@ int remove_user(char* username, User** user_arr, int* num_users) {
             free(user_arr[i]->username);
             free(user_arr[i]->alias);
             free(user_arr[i]->date);
+            free(user_arr[i]->ip);
+            free(user_arr[i]->port);
+            free(user_arr[i]->pending);
             free(user_arr[i]);
             // Mover los elementos restantes de la lista un espacio hacia atrás
             for (int j = i; j < *num_users - 1; j++) {
@@ -120,6 +125,7 @@ int remove_user(char* username, User** user_arr, int* num_users) {
 
 
 int registered(const char *username, const char *alias, User **users, int num_users){
+    // Devuelve 1 si existe 0 si no existe
     int i;
 
     for(i = 0; i < num_users; i++){
@@ -130,6 +136,40 @@ int registered(const char *username, const char *alias, User **users, int num_us
     } 
     
     return 0;
+}
+
+int connected(char *alias, User **users, int num_users){
+    // Devuelve 1 si existe 0 si no existe
+    int i;
+
+    for(i = 0; i < num_users; i++){
+            if (users[i]->connected == CONNECTED){
+                    return 1;
+            } 
+    } 
+    
+    return 0;
+}
+
+int fill_connected(char *alias, char* ip, char *port, User **users, int num_users){
+    int i;
+
+    for(i = 0; i < num_users; i++){
+            if (strcmp(users[i]->alias, alias) == 0){ // Usuario encontrado
+                if (users[i]->connected == CONNECTED)
+                    return 2; // Usuario ya conectado
+                
+                else{
+                    users[i]->ip = strdup(alias);
+                    users[i]->port = strdup(port);
+                    users[i]->connected = CONNECTED;
+                    return 0; // Caso exito (asigna ip, port y pone a conectado)
+                }
+
+            } 
+    } 
+    
+    return 1; // Usuario no registrado
 }
 
 void free_user_array(User **user_arr, int num_users) {
