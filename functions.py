@@ -1,5 +1,7 @@
 MAX_LINE_LENGHT = 1024
 
+import socket
+
 def formatPetition(*args):
     petition = ":;".join(args)
     petition += "\0"
@@ -19,3 +21,5 @@ def readString(sock):
             # Si se recibió el carácter nulo, se terminó de recibir el mensaje
             break
     return a.split('\0')[0]
+
+

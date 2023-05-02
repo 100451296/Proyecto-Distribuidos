@@ -1,2 +1,4 @@
 usuario2,alias2,date2;
 edunavata,edu,22-05-2023;
+Tex,Tex,15-05-2023;
+Te,Te,29-05-2023;

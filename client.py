@@ -5,6 +5,7 @@ from enum import Enum
 import argparse
 import socket
 from functions import *
+import threading
 
 class client :
 
@@ -24,6 +25,10 @@ class client :
     _alias = None
     _date = None
     _server_addres = None
+    _connected = True
+    _socketMessages = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    _thread = None
+   
 
     OP_REGISTER = 'REGISTER'
     OP_UNREGISTER = 'UNREGISTER'
@@ -79,6 +84,22 @@ class client :
 
         return client.RC.ERROR
 
+    @staticmethod
+    def recvMessages(socket):
+        socket.settimeout(1)  # tiempo de espera para recibir conexiones
+        while client._connected:
+            socket.listen(1)
+            print("Estoy")
+            try:
+                conn, addr = socket.accept()
+                print('Conectado por', addr)
+                # procesar conexión
+            except Exception as e:
+                pass  # seguir esperando conexiones
+        print("Salhgo")
+        socket.close()
+
+
 
     # *
     # * @param user - User name to connect to the system
@@ -88,8 +109,17 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def  connect(user, window):
+        
+        client._socketMessages.bind(('localhost', 0))
+        host, port = client._socketMessages.getsockname()
+        
+        client._thread = threading.Thread(target=client.recvMessages, args=(client._socketMessages,))
+
+        client._thread.start()
+        
+        
         window['_SERVER_'].print("s> CONNECT OK")
-        #  Write your code here
+        
         return client.RC.ERROR
 
 
@@ -101,9 +131,14 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def  disconnect(user, window):
+        client._connected = False
+        client._socketMessages.close()
         window['_SERVER_'].print("s> DISCONNECT OK")
-        #  Write your code here
+        
         return client.RC.ERROR
+    
+  
+
 
     # *
     # * @param user    - Receiver user name
