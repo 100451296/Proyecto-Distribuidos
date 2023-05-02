@@ -132,8 +132,12 @@ class client :
 
         if result == "0":
             window['_SERVER_'].print("s> CONNECT " + client._username + " OK")
+        elif result == "1":
+            window['_SERVER_'].print("s> CONNECT FAIL, USER DOES NOT EXIST")
+        elif result == "2":
+            window['_SERVER_'].print("s> USER ALREADY CONNECTED")
         else:
-            window['_SERVER_'].print("s> CONNECT " + client._username + " FAIL")
+            window['_SERVER_'].print("s> CONNECT FAIL")
 
 
         
@@ -160,9 +164,13 @@ class client :
         connection.close()
 
         if result == "0":
-            window['_SERVER_'].print("s> DISCONNECT " + client._username + " OK")
+            window['_SERVER_'].print("s> CONNECT " + client._username + " OK")
+        elif result == "1":
+            window['_SERVER_'].print("s> CONNECT FAIL, USER DOES NOT EXIST")
+        elif result == "2":
+            window['_SERVER_'].print("s> USER NOT CONNECTED")
         else:
-            window['_SERVER_'].print("s> DISCONNECT " + client._username + " FAIL")
+            window['_SERVER_'].print("s> DISCONNECT FAIL")
 
         client._connected = False
         client._thread = None

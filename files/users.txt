@@ -3,3 +3,4 @@ edunavata,edu,22-05-2023;
 Te,Te,29-05-2023;
 T,T,29-05-2023;
 el nano,elna,22-05-2023;
+Tex,Tex,23-05-2023;
