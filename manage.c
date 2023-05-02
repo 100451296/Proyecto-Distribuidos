@@ -122,8 +122,6 @@ int remove_user(char* username, User** user_arr, int* num_users) {
     }
 }
 
-
-
 int registered(const char *username, const char *alias, User **users, int num_users){
     // Devuelve 1 si existe 0 si no existe
     int i;
@@ -194,8 +192,6 @@ void free_user_array(User **user_arr, int num_users) {
     }
     free(user_arr);
 }
-
-
 
 char **split_fields(char *message) {
     // Devuelve un array dinámico con los campos de la peticion (separados por DELIM)
