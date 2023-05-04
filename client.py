@@ -28,7 +28,6 @@ class client :
     _connected = True
     _thread = None
    
-
     OP_REGISTER = 'REGISTER'
     OP_UNREGISTER = 'UNREGISTER'
     OP_CONNECT = 'CONNECT'
@@ -42,17 +41,19 @@ class client :
     # * @return USER_ERROR if the user is already registered
     # * @return ERROR if another error occurred
     @staticmethod
-    def  register(user, window):
+    def register(user, window):
 
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
+        # Generamos petición para mandar 
         message = formatPetition(client.OP_REGISTER, client._username, user, client._date)
         connection.sendall(message.encode("utf-8"))
 
         result = readString(connection)
         connection.close()
 
+        # Mensaje de resultado de conexion
         if result == "0":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " OK")
         else:
@@ -85,6 +86,7 @@ class client :
 
         return client.RC.ERROR
 
+    # Funcion que usa hilo creado por connect()
     @staticmethod
     def recvMessages(socket):
         socket.settimeout(1)  # tiempo de espera para recibir conexiones
@@ -100,31 +102,30 @@ class client :
         print("Salhgo")
         socket.close()
 
-
-
     # *
     # * @param user - User name to connect to the system
-    # *
+    # * 
     # * @return OK if successful
     # * @return USER_ERROR if the user does not exist or if it is already connected
     # * @return ERROR if another error occurred
+
+    # Crea el hilo 
     @staticmethod
-    def  connect(user, window):
+    def connect(user, window):
         socketMessages = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socketMessages.bind(('localhost', 0))
+        socketMessages.bind(('localhost', 0)) # 0: que busque puerto disponible
         host, port = socketMessages.getsockname()
         
         if client._thread == None:
             client._connected = True
             client._thread = threading.Thread(target=client.recvMessages, args=(socketMessages,))
-
+            # target=client.recvMessages xq recvMessages es staticmethod
             client._thread.start()
 
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         message = formatPetition(client.OP_CONNECT, client._alias, str(port))
-        
         connection.sendall(message.encode("utf-8"))
 
         result = readString(connection)
@@ -139,10 +140,7 @@ class client :
         else:
             window['_SERVER_'].print("s> CONNECT FAIL")
 
-
-        
         return client.RC.ERROR
-
 
     # *
     # * @param user - User name to disconnect from the system
@@ -151,13 +149,12 @@ class client :
     # * @return USER_ERROR if the user does not exist
     # * @return ERROR if another error occurred
     @staticmethod
-    def  disconnect(user, window):
+    def disconnect(user, window):
 
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         message = formatPetition(client.OP_DISCONNECT, client._alias)
-
         connection.sendall(message.encode("utf-8"))
 
         result = readString(connection)
