@@ -1,2 +1,2 @@
-# Proyecto-Ubicuos
+# Proyecto-Distribuidos
 Servicio de chat distribuido
