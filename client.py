@@ -32,6 +32,7 @@ class client :
     OP_UNREGISTER = 'UNREGISTER'
     OP_CONNECT = 'CONNECT'
     OP_DISCONNECT = 'DISCONNECT'
+    OP_SEND = 'SEND'
 
     # ******************** METHODS *******************
     # *
@@ -174,8 +175,6 @@ class client :
         
         return client.RC.ERROR
     
-  
-
 
     # *
     # * @param user    - Receiver user name
@@ -185,8 +184,31 @@ class client :
     # * @return USER_ERROR if the user is not connected (the message is queued for delivery)
     # * @return ERROR the user does not exist or another error occurred
     @staticmethod
-    def  send(user, message, window):
-        window['_SERVER_'].print("s> SEND MESSAGE OK")
+    def send(user, message, window):
+        # ******* Conexión de cliente con servidor  ******* #
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
+        connection.connect(client._server_addres) # Conectamos el socket al servidor
+
+        # Generamos petición para mandar 
+        message = formatPetition(client.OP_SEND, client._username, user, mesage)
+        connection.sendall(message.encode("utf-8"))
+
+        result = readString(connection)
+        connection.close()
+
+        # ******* Seguro contra mensaje muy largos  ******* #
+        if len(message) > MAX_MESSAGE:
+            window['_SERVER_'].print("s> SEND FAIL / MESSAGE TOO LONG")
+            return client.RC.ERROR
+
+        # ******* Retroalimentación a interfaz  ******* #
+        # Todo bien
+        if result == '0':
+            window['_SERVER_'].print("s> SEND MESSAGE <id> OK")
+        elif result = '1':
+            window['_SERVER_'].print("s> SEND FAIL / USER " + user + " DOES NOT EXIST")
+            window['_SERVER_'].print("s> SEND MESSAGE FAIL")
+
         print("SEND " + user + " " + message)
         #  Write your code here
         return client.RC.ERROR

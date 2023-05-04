@@ -1,4 +1,5 @@
 MAX_LINE_LENGHT = 1024
+MAX_MESSAGE = 256
 DELIM = ":;"
 
 import socket
