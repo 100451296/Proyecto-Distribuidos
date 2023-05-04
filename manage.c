@@ -164,12 +164,12 @@ int fill_connection(char *alias, char* ip, char *port, User **users, int num_use
                     } // Asginamos ip y port 
 
                     else{ // Queremos desconectar al usuario
-                    /*
+                    
                         free(users[i]->ip);
                         users[i]->ip = NULL;
                         free(users[i]->port);
                         users[i]->port = NULL;
-                    */
+                    
                     } // Borramos ip y port
 
                     users[i]->connected = mode; // Le conectamos/desconectamos
