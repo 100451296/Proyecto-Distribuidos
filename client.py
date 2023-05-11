@@ -48,8 +48,7 @@ class client :
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         # Generamos petición para mandar 
-        message = formatPetition(client.OP_REGISTER, client._username, user, client._date)
-        connection.sendall(message.encode("utf-8"))
+        message = formatPetition(connection, client.OP_REGISTER, client._username, user, client._date)
 
         result = readString(connection)
         connection.close()
@@ -74,8 +73,8 @@ class client :
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
-        message = formatPetition(client.OP_UNREGISTER, client._username, user, client._date)
-        connection.sendall(message.encode("utf-8"))
+        message = formatPetition(connection, client.OP_UNREGISTER, client._username, user, client._date)
+
 
         result = readString(connection)
         connection.close()
@@ -126,8 +125,8 @@ class client :
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
-        message = formatPetition(client.OP_CONNECT, client._alias, str(port))
-        connection.sendall(message.encode("utf-8"))
+        message = formatPetition(connection, client.OP_CONNECT, client._alias, str(port))
+        #connection.sendall(message.encode("utf-8"))
 
         result = readString(connection)
         connection.close()
@@ -155,8 +154,8 @@ class client :
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
-        message = formatPetition(client.OP_DISCONNECT, client._alias)
-        connection.sendall(message.encode("utf-8"))
+        message = formatPetition(connection,client.OP_DISCONNECT, client._alias)
+        #connection.sendall(message.encode("utf-8"))
 
         result = readString(connection)
         connection.close()
