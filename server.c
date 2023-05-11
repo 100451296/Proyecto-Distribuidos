@@ -44,16 +44,19 @@ void manage_client(int *sc){
 	// Realiza la recepción del codigo de operacion
 	recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
 
+
         //TO DO: Funcion para comprobar que el formato de la peticion sea valido
 
         // Trocea la peticion y reinicia buffer
-        agregar_string(&peticion, num_peticion, buffer);
+        agregar_string(&peticion, &num_peticion, buffer);
+        
+        printf("Mensaje recibido: %s\noeticion: %s\n", buffer, peticion[0]);
 
         if (peticion == NULL){
                 printf("Se envió un petición vacía");
                 close(sc_copied);
                 pthread_exit(0);
-                
+          
         }
 
         // Inicio seccion critica para acceder a users
@@ -61,14 +64,16 @@ void manage_client(int *sc){
 
         //Tratamiento peticion REGISTER
         if (strcmp(peticion[0],"REGISTER") == 0){
-                
+                printf("Register\n");
                 // Pone la zona de memoria del buffer todo a 0 y recibe
                 for (i = 0; i < NUM_REGISTER; i++){
                         memset(buffer, 0, sizeof(buffer));
+                        printf("Paso a recibir\n");
                         recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
-                        agregar_string(&peticion, num_peticion, buffer);
+                        agregar_string(&peticion, &num_peticion, buffer);
+
                 }
-                
+                printf("Paso a registered\n username: %s alias: %s", peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS]);
                 if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 1){
                         sprintf(buffer, "%d", 1);
                 } // Usuario registrado
@@ -111,6 +116,10 @@ void manage_client(int *sc){
                 fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
                                 users, num_users, DISCONNECTED));
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+        }
+        else{
+               printf("Comando desconcoido\n");
+               sprintf(buffer, "%d", -1); 
         }
 
         pthread_mutex_unlock(&mutex_users); // Fin sección critica users

@@ -51,6 +51,6 @@ int registered(const char *username, const char *alias, User **users, int num_us
 int remove_user(char *username, User **user_arr, int *num_users);
 int connected(char *alias, User **users, int num_users);
 int fill_connection(char *alias, char* ip, char *port, User **users, int num_users, int mode);
-int agregar_string(char ***array, int num_elementos, char *nuevo_string);
+int agregar_string(char ***array, int *num_elementos, char *nuevo_string);
 
 #endif

@@ -3,15 +3,18 @@ MAX_MESSAGE = 256
 DELIM = ":;"
 
 import socket
+import time
 
 def formatPetition(socket, *args):
-    for i in args:
-        peticion = i + "\0"
+    for i in range(len(args)):
+        peticion = args[i] + "\0"
+        print(peticion)
         res = socket.sendall(peticion.encode("utf-8"))
-        if res  < len(i):
-            return -1 # No se ha enviado todo el contenido de i
-        elif res == len(i):
-            return 0 # Se ha enviado todo el contenido
+        time.sleep(0.2)
+        # if res  < len(i):
+        #     return -1 # No se ha enviado todo el contenido de i
+        # elif res == len(i):
+    return 0 # Se ha enviado todo el contenido
 
 def readString(sock):
     a = ''

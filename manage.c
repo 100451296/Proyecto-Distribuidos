@@ -213,19 +213,20 @@ char **split_fields(char *message) {
     return fields;
 }
 
-int agregar_string(char ***array, int num_elementos, char *nuevo_string) {
+int agregar_string(char ***array, int *num_elementos, char *nuevo_string) {
     // Primero, reservamos memoria para un nuevo elemento en el array
-    char **nuevo_array = realloc(*array, (num_elementos + 1) * sizeof(char *));
+    char **nuevo_array = realloc(*array, (*num_elementos + 1) * sizeof(char *));
     if (nuevo_array == NULL) {
         // En caso de que realloc falle, no se modifica el array original
         return -1;
     }
 
     // Añadimos el nuevo string al final del array
-    nuevo_array[num_elementos] = strdup(nuevo_string);
+    nuevo_array[*num_elementos] = strdup(nuevo_string);
 
     // Actualizamos el puntero del array original
     *array = nuevo_array;
+    *num_elementos = *num_elementos + 1;
 
     return 0;
 }
