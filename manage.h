@@ -25,6 +25,14 @@
 #define CONNECTED_ALIAS 1
 #define CONNECTED_PORT 2
 
+// NUMERO PARAMETROS POR PETICION
+#define NUM_REGISTER 3
+#define NUM_UNREGISTER 3
+#define NUM_CONNNECT 2
+#define NUM_DISCONNECT 1
+#define NUM_SEND 3
+
+
 typedef struct User {
     char *username;
     char *alias;
@@ -43,5 +51,6 @@ int registered(const char *username, const char *alias, User **users, int num_us
 int remove_user(char *username, User **user_arr, int *num_users);
 int connected(char *alias, User **users, int num_users);
 int fill_connection(char *alias, char* ip, char *port, User **users, int num_users, int mode);
+int agregar_string(char ***array, int num_elementos, char *nuevo_string);
 
 #endif

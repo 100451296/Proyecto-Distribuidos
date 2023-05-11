@@ -21,8 +21,9 @@ struct sockaddr_in client_addr;
 void manage_client(int *sc){
         int sc_copied;
         char buffer[MAX_LINE_LENGTH];
-        char **peticion;
-        //char *client_ip;
+        char **peticion = NULL;
+        int num_peticion = 0;
+        int i = 0;
 
         pthread_mutex_lock(&mutex_socket);
         sc_copied = *sc; 
@@ -40,13 +41,13 @@ void manage_client(int *sc){
 	// Pone la zona de memoria del buffer todo a 0
 	memset(buffer, 0, sizeof(buffer));
 
-	// Realiza la recepción de la petición en el formato esperado
+	// Realiza la recepción del codigo de operacion
 	recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
 
         //TO DO: Funcion para comprobar que el formato de la peticion sea valido
 
         // Trocea la peticion y reinicia buffer
-        peticion = split_fields(buffer);
+        agregar_string(&peticion, num_peticion, buffer);
 
         if (peticion == NULL){
                 printf("Se envió un petición vacía");
@@ -60,6 +61,13 @@ void manage_client(int *sc){
 
         //Tratamiento peticion REGISTER
         if (strcmp(peticion[0],"REGISTER") == 0){
+                
+                // Pone la zona de memoria del buffer todo a 0 y recibe
+                for (i = 0; i < NUM_REGISTER; i++){
+                        memset(buffer, 0, sizeof(buffer));
+                        recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                        agregar_string(&peticion, num_peticion, buffer);
+                }
                 
                 if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 1){
                         sprintf(buffer, "%d", 1);
