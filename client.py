@@ -190,19 +190,20 @@ class client :
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         # Generamos petición para mandar 
-        message = formatPetition(client.OP_SEND, client._username, user, message)
-        connection.sendall(message.encode("utf-8"))
+        message = formatPetition(connection, client.OP_SEND, client._username, user, message)
 
         result = readString(connection)
         connection.close()
 
         # ******* Verificación campos DEST y MESSAGE  ******* #
-        if len(user._INDEST_) == 0:
-            window['_CLIENT_'].print("c> SEND <user> <message>") 
+        if len(user) == 0:
+            window['_CLIENT_'].print("c> SEND <user> " + message) 
             return client.RC.ERROR
+        elif len(message) <= 0:
+            window['_CLIENT_'].print("c> SEND "+ user+ " <message>") 
 
         # ******* Seguro contra mensaje muy largos  ******* #
-        if len(message) > MAX_MESSAGE:
+        elif len(message) > MAX_MESSAGE:
             window['_SERVER_'].print("s> SEND FAIL / MESSAGE TOO LONG")
             return client.RC.ERROR
 
@@ -210,14 +211,12 @@ class client :
         # Todo bien
         if result == '0':
             window['_SERVER_'].print("s> SEND MESSAGE <id> OK")
-        elif result = '1':
+        elif result == '1':
             window['_SERVER_'].print("s> USER " + user + " DOES NOT EXIST")
         elif result == '2':
             window['_SERVER_'].print("s> SEND FAIL")
 
-        
-        print("SEND " + user + " " + message)
-        #  Write your code here
+        print("c> SEND " + user + " " + message)
         return client.RC.ERROR
 
     # *

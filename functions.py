@@ -4,10 +4,14 @@ DELIM = ":;"
 
 import socket
 
-def formatPetition(*args):
-    petition = DELIM.join(args)
-    petition += "\0"
-    return petition
+def formatPetition(socket, *args):
+    for i in args:
+        peticion = i + "\0"
+        res = socket.sendall(peticion.encode("utf-8"))
+        if res  < len(i):
+            return -1 # No se ha enviado todo el contenido de i
+        elif res == len(i):
+            return 0 # Se ha enviado todo el contenido
 
 def readString(sock):
     a = ''
