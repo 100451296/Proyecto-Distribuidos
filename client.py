@@ -21,9 +21,9 @@ class client :
     _server = None
     _port = -1
     _quit = 0
-    _username = None
-    _alias = None
-    _date = None
+    _username = "edu"
+    _alias = "edu"
+    _date = "1/1/1"
     _server_addres = None
     _connected = True
     _thread = None
@@ -195,19 +195,22 @@ class client :
         message = formatPetition(connection, client.OP_SEND, client._username, user, message)
 
         result = readString(connection)
-        connection.close()
-
+        resetBuffer(connection)
+        id = readString(connection)[:-1]
+        
+ 
         
         # ******* Retroalimentación a interfaz  ******* #
         # Todo bien
         if result == '0':
-            window['_SERVER_'].print("s> SEND MESSAGE <id> OK")
+            window['_SERVER_'].print(f"s> SEND MESSAGE {id} OK")
+            
         elif result == '1':
             window['_SERVER_'].print("s> USER " + user + " DOES NOT EXIST")
         elif result == '2':
             window['_SERVER_'].print("s> SEND FAIL")
 
-
+        connection.close()
         return client.RC.ERROR
 
     # *

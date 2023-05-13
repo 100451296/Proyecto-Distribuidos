@@ -24,7 +24,8 @@ void manage_client(int *sc){
         char **peticion = NULL;
         int num_peticion = 0;
         int i = 0;
-        int id;
+        unsigned int id;
+        char send_buffer[MAX_LINE_LENGTH];
 
         pthread_mutex_lock(&mutex_socket);
         sc_copied = *sc; 
@@ -189,9 +190,33 @@ void manage_client(int *sc){
                         printf("Actualizando id\n");
                         id = updateID(peticion[SEND_REMI], users, num_users);
                         writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]);
+                        sprintf(buffer, "%d", 0);
                 }
 
-                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+                switch(atoi(buffer)){
+                        case 0:
+                                send(sc_copied, buffer, MAX_ALIAS_LENGTH, MSG_WAITALL);
+                                /*
+                                memset(buffer, 0, sizeof(buffer));
+                                printf("Paso a recibir\n");
+                                recv(sc_copied, buffer, 2, 0);
+                                printf("Recibo OK: %s\n", buffer);
+                                */
+                                
+                                memset(buffer, 0, sizeof(buffer));
+                                sprintf(send_buffer, "\n%u\n", id);
+                                printf("Mando ID: %s\n", send_buffer);
+                                send(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+
+                                break;
+                        default:
+                                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+                                break;
+                                
+                }
+                        
+                
+                
         }
         else{
                printf("Comando desconcoido\n");
