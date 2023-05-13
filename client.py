@@ -54,6 +54,8 @@ class client :
         result = readString(connection)
         connection.close()
 
+        print("Reesult: ", result)
+
         # Mensaje de resultado de conexion
         if result == "0":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " OK")

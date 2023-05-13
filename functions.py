@@ -10,10 +10,9 @@ def formatPetition(socket, *args):
         peticion = args[i] + "\0"
         print(peticion)
         res = socket.sendall(peticion.encode("utf-8"))
-        time.sleep(0.2)
-        # if res  < len(i):
-        #     return -1 # No se ha enviado todo el contenido de i
-        # elif res == len(i):
+        confirmacion = socket.recv(1024).decode("utf-8")
+        #time.sleep(0.2)
+    
     return 0 # Se ha enviado todo el contenido
 
 def readString(sock):

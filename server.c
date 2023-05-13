@@ -44,6 +44,8 @@ void manage_client(int *sc){
 	// Realiza la recepción del codigo de operacion
 	recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
 
+        // Envía una confirmación al cliente
+        send(sc_copied, "OK", 2, 0);
 
         //TO DO: Funcion para comprobar que el formato de la peticion sea valido
 
@@ -71,7 +73,8 @@ void manage_client(int *sc){
                         printf("Paso a recibir\n");
                         recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
                         agregar_string(&peticion, &num_peticion, buffer);
-
+                        // Envía una confirmación al cliente
+                        send(sc_copied, "OK", 2, 0);
                 }
                 printf("Paso a registered\n username: %s alias: %s", peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS]);
                 if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 1){
