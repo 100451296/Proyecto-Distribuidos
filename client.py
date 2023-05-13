@@ -50,11 +50,9 @@ class client :
         # Generamos petición para mandar 
         message = formatPetition(connection, client.OP_REGISTER, client._username, user, client._date)
 
-        print("paso a recibirs", "\nnum:", message)
         result = readString(connection)
         connection.close()
 
-        print("Reesult: ", result)
 
         # Mensaje de resultado de conexion
         if result == "0":

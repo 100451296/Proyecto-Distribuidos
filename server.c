@@ -97,7 +97,7 @@ void manage_client(int *sc){
 
         else if (strcmp(peticion[0], "UNREGISTER") == 0){
 
-                 for (i = 0; i < NUM_UNREGISTER; i++){
+                for (i = 0; i < NUM_UNREGISTER; i++){
                         // Reinicia buffer para recibir
                         memset(buffer, 0, sizeof(buffer));
 
@@ -122,6 +122,17 @@ void manage_client(int *sc){
         }
 
         else if (strcmp(peticion[0], "CONNECT") == 0){
+                for (i = 0; i < NUM_CONNECT; i++){
+                        // Reinicia buffer para recibir
+                        memset(buffer, 0, sizeof(buffer));
+
+                        // Recibe dato
+                        recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                        // Agrega el dato a la peticion (lista de strings)
+                        agregar_string(&peticion, &num_peticion, buffer);
+                        // Manda la confirmacion
+                        send(sc_copied, "OK", 2, 0);
+                }
                sprintf(buffer, "%d", 
                 fill_connection(peticion[CONNECTED_ALIAS], NULL, peticion[CONNECTED_PORT], 
                                 users, num_users, CONNECTED));
@@ -131,6 +142,18 @@ void manage_client(int *sc){
         }
 
         else if (strcmp(peticion[0], "DISCONNECT") == 0){
+                for (i = 0; i < NUM_DISCONNECT; i++){
+                        // Reinicia buffer para recibir
+                        memset(buffer, 0, sizeof(buffer));
+
+                        // Recibe dato
+                        recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                        // Agrega el dato a la peticion (lista de strings)
+                        agregar_string(&peticion, &num_peticion, buffer);
+                        // Manda la confirmacion
+                        send(sc_copied, "OK", 2, 0);
+                }
+
                sprintf(buffer, "%d", 
                 fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
                                 users, num_users, DISCONNECTED));
