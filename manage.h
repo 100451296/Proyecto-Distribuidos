@@ -27,6 +27,12 @@
 #define CONNECTED_ALIAS 1
 #define CONNECTED_PORT 2
 
+#define SEND_REMI 1
+#define SEND_DEST 2
+#define SEND_CONTENT 3
+
+
+
 // NUMERO PARAMETROS POR PETICION
 #define NUM_REGISTER 3
 #define NUM_UNREGISTER 3
@@ -42,18 +48,24 @@ typedef struct User {
     int connected; // 0 disconnected 1 connected
     char *ip;
     char *port;
+    unsigned int id;
 } User;
 
 char **split_fields(char *message);
 User **read_users_from_file(int *num_users);
 int add_user(const char *new_username, const char *new_alias, const char *new_date, User **user_arr, int *num_users);
 void free_user_array(User **user_arr, int num_users);
-int registered(const char *username, const char *alias, User **users, int num_users);
+int registered(const char *alias, User **users, int num_users);
 int remove_user(char *username, User **user_arr, int *num_users);
 int connected(char *alias, User **users, int num_users);
 int fill_connection(char *alias, char* ip, char *port, User **users, int num_users, int mode);
 int agregar_string(char ***array, int *num_elementos, char *nuevo_string);
 int createPendingFile(const char *alias);
 int deletePendingFile(const char *alias);
+int writePendingMessage(const char* dest, const char* remitente, int id, const char* content);
+int increaseId(char *alias, User **users, int num_users);
+unsigned int incrementAndReset(unsigned int value);
+int updateID(char *alias, User **users, int num_users);
+int updateUsers();
 
 #endif

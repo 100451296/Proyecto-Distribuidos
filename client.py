@@ -186,6 +186,8 @@ class client :
     @staticmethod
     def send(user, message, window):
         # ******* Conexión de cliente con servidor  ******* #
+
+        print("Datos", user, message, "user", type(user))
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
@@ -195,18 +197,7 @@ class client :
         result = readString(connection)
         connection.close()
 
-        # ******* Verificación campos DEST y MESSAGE  ******* #
-        if len(user) == 0:
-            window['_CLIENT_'].print("c> SEND <user> " + message) 
-            return client.RC.ERROR
-        elif len(message) <= 0:
-            window['_CLIENT_'].print("c> SEND "+ user+ " <message>") 
-
-        # ******* Seguro contra mensaje muy largos  ******* #
-        elif len(message) > MAX_MESSAGE:
-            window['_SERVER_'].print("s> SEND FAIL / MESSAGE TOO LONG")
-            return client.RC.ERROR
-
+        
         # ******* Retroalimentación a interfaz  ******* #
         # Todo bien
         if result == '0':
@@ -216,7 +207,7 @@ class client :
         elif result == '2':
             window['_SERVER_'].print("s> SEND FAIL")
 
-        print("c> SEND " + user + " " + message)
+
         return client.RC.ERROR
 
     # *

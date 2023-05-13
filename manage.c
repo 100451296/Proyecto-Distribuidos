@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "manage.h"
-
+#include <limits.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,16 +23,18 @@ User **read_users_from_file(int *num_users) {
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL && i < MAX_USERS) {
         user_str = strtok(line, ";");
         while (user_str != NULL && i < MAX_USERS) {
-            char *username, *alias, *date;
+            char *username, *alias, *date, *id;
             username = strtok(user_str, ",");
             alias = strtok(NULL, ",");
             date = strtok(NULL, ",");
+            id = strtok(NULL, ",");
             if (username != NULL && alias != NULL && date != NULL) {
                 User *new_user = malloc(sizeof(User));
                 new_user->username = strdup(username);
                 new_user->alias = strdup(alias);
                 new_user->date = strdup(date);
                 new_user->connected = DISCONNECTED;
+                sscanf(id, "%u", &new_user->id);
                 user_arr[i] = new_user;
                 i++;
             }
@@ -55,7 +57,7 @@ int add_user(const char *new_username, const char *new_alias, const char *new_da
     }
 
     // Write new user to file
-    fprintf(fp, "%s,%s,%s;\n", new_username, new_alias, new_date);
+    fprintf(fp, "%s,%s,%s,%d;\n", new_username, new_alias, new_date, 0);
 
     fclose(fp);
 
@@ -65,6 +67,7 @@ int add_user(const char *new_username, const char *new_alias, const char *new_da
     new_user->alias = strdup(new_alias);
     new_user->date = strdup(new_date);
     new_user->connected = DISCONNECTED;
+    new_user->id = 0;
 
     if (*num_users < MAX_USERS) {
         user_arr[*num_users] = new_user;
@@ -110,7 +113,7 @@ int remove_user(char* username, User** user_arr, int* num_users) {
         
         // Escribir los usuarios restantes en el archivo
         for (int i = 0; i < *num_users; i++) {
-            fprintf(f, "%s,%s,%s\n", user_arr[i]->username, user_arr[i]->alias, user_arr[i]->date);
+            fprintf(f, "%s,%s,%s,%d;\n", user_arr[i]->username, user_arr[i]->alias, user_arr[i]->date, user_arr[i]->id);
         }
         
         fclose(f);
@@ -122,18 +125,46 @@ int remove_user(char* username, User** user_arr, int* num_users) {
     }
 }
 
-int registered(const char *username, const char *alias, User **users, int num_users){
+int updateUsers(User **user_arr, int num_users){
+    FILE* f = fopen(USERS_PATH, "w");
+        if (f == NULL) {
+            printf("Error opening file!\n");
+            return -1;
+        }
+        
+        // Escribir los usuarios restantes en el archivo
+        for (int i = 0; i < num_users; i++) {
+            fprintf(f, "%s,%s,%s,%d;\n", user_arr[i]->username, user_arr[i]->alias, user_arr[i]->date, user_arr[i]->id);
+        }
+        
+        fclose(f);
+        return 0;
+}
+
+int updateID(char *alias, User **user_arr, int num_users){
+    // Buscar el usuario y eliminarlo de la lista dinámica
+    for (int i = 0; i < num_users; i++) {
+        if (strcmp(alias, user_arr[i]->alias) == 0) {
+            user_arr[i]->id = incrementAndReset(user_arr[i]->id);
+            updateUsers(user_arr, num_users);
+            return user_arr[i]->id;
+        }
+    }
+
+    return -1;
+}
+
+int registered(const char *alias, User **users, int num_users){
     // Devuelve 1 si existe 0 si no existe
     int i;
 
     for(i = 0; i < num_users; i++){
-            if (strcmp(users[i]->username, username) == 0 ||
-                strcmp(users[i]->alias, alias) == 0){
-                    return 1;
+            if (strcmp(users[i]->alias, alias) == 0){
+                    return 1; // REGISTADO
             } 
     } 
     
-    return 0;
+    return 0; // NO REGISTRADO
 }
 
 int connected(char *alias, User **users, int num_users){
@@ -181,6 +212,14 @@ int fill_connection(char *alias, char* ip, char *port, User **users, int num_use
     } 
     
     return 1; // Usuario no registrado
+}
+
+unsigned int incrementAndReset(unsigned int value) {
+    if (value == UINT_MAX) {
+        return 1;
+    } else {
+        return value + 1;
+    }
 }
 
 void free_user_array(User **user_arr, int num_users) {
@@ -241,8 +280,6 @@ int createPendingFile(const char *alias) {
         return -1;
     }
     
-    fprintf(file, "This is a pending file for %s\n", alias);
-    
     fclose(file);
     printf("Pending file created: %s\n", filename);
     return 0;
@@ -258,5 +295,23 @@ int deletePendingFile(const char *alias) {
     }
     
     printf("Pending file deleted: %s\n", filename);
+    return 0;
+}
+
+int writePendingMessage(const char* dest, const char* remitente, int id, const char* content) {
+    /*Escribe en el archivo pendings/dest.txt el mensaje remi,id,content*/
+    char filename[256];
+    sprintf(filename, "%s%s.txt", PENDINGS_PATH, dest);
+
+    FILE* file = fopen(filename, "a");
+    if (file == NULL) {
+        printf("Error opening file for writing: %s\n", filename);
+        return -1;
+    }
+
+    fprintf(file, "%s,%d,%s\n", remitente, id, content);
+
+    fclose(file);
+    printf("Message written to file: %s\n", filename);
     return 0;
 }

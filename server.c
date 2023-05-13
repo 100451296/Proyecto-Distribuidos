@@ -24,6 +24,7 @@ void manage_client(int *sc){
         char **peticion = NULL;
         int num_peticion = 0;
         int i = 0;
+        int id;
 
         pthread_mutex_lock(&mutex_socket);
         sc_copied = *sc; 
@@ -80,7 +81,7 @@ void manage_client(int *sc){
                         send(sc_copied, "OK", 2, 0);
                 }
                 
-                if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 1){
+                if (registered(peticion[REGISTER_ALIAS], users, num_users) == 1){
                         sprintf(buffer, "%d", 1);
                 } // Usuario registrado
         
@@ -111,7 +112,7 @@ void manage_client(int *sc){
                         send(sc_copied, "OK", 2, 0);
                 }
 
-                if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 0){
+                if (registered(peticion[REGISTER_ALIAS], users, num_users) == 0){
                         sprintf(buffer, "%d", 1);
                 } // Usuario no registrado
         
@@ -162,6 +163,34 @@ void manage_client(int *sc){
                sprintf(buffer, "%d", 
                 fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
                                 users, num_users, DISCONNECTED));
+                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+        }
+
+        else if (strcmp(peticion[0], "SEND") == 0){
+                printf("Entro a send\n");
+                for (i = 0; i < NUM_SEND; i++){
+                        // Reinicia buffer para recibir
+                        memset(buffer, 0, sizeof(buffer));
+
+                        // Recibe dato
+                        recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                        // Agrega el dato a la peticion (lista de strings)
+                        agregar_string(&peticion, &num_peticion, buffer);
+                        // Manda la confirmacion
+                        send(sc_copied, "OK", 2, 0);
+                }
+                printf("Argumentos recibidos\n");
+                if (registered(peticion[SEND_REMI], users, num_users) == 0 ||
+                    registered(peticion[SEND_DEST], users, num_users) == 0){
+                        sprintf(buffer, "%d", -1); // Alguno de los dos usuarios no está registrado
+                        printf("No estanb registrados %s , %s\n", peticion[SEND_DEST], peticion[SEND_REMI]);
+                    }
+                else{
+                        printf("Actualizando id\n");
+                        id = updateID(peticion[SEND_REMI], users, num_users);
+                        writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]);
+                }
+
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
         }
         else{
