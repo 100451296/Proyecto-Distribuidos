@@ -12,5 +12,4 @@ Textffffffffffffff,Textfffffffffffffffffffff,28-05-2023;
 Textggggggggggggggggggggg,Textgggggggggggggggggggg,29-05-2023;
 Textkkkkkkkkkkkkkkkkkk,Textkkkkkkkkkkkkkkkk,15-05-2023;
 Textqqqqqqqqqqqqqqqqqqqqqq,Textqqqqqqqqqqqqqqqqqqqqqqqq,29-05-2023;
-Textfffffffffffffffffff,Textfffffffffffffffffffffffff,29-05-2023;
 ahorasiqeusi,ahorasiquesi,23-05-2023;

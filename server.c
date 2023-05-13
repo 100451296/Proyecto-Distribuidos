@@ -69,14 +69,17 @@ void manage_client(int *sc){
                 printf("Register\n");
                 // Pone la zona de memoria del buffer todo a 0 y recibe
                 for (i = 0; i < NUM_REGISTER; i++){
+                        // Reinicia buffer para recibir
                         memset(buffer, 0, sizeof(buffer));
-                        printf("Paso a recibir\n");
+
+                        // Recibe dato
                         recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                        // Agrega el dato a la peticion (lista de strings)
                         agregar_string(&peticion, &num_peticion, buffer);
-                        // Envía una confirmación al cliente
+                        // Manda la confirmacion
                         send(sc_copied, "OK", 2, 0);
                 }
-                printf("Paso a registered\n username: %s alias: %s", peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS]);
+                
                 if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 1){
                         sprintf(buffer, "%d", 1);
                 } // Usuario registrado
@@ -93,6 +96,19 @@ void manage_client(int *sc){
         }
 
         else if (strcmp(peticion[0], "UNREGISTER") == 0){
+
+                 for (i = 0; i < NUM_UNREGISTER; i++){
+                        // Reinicia buffer para recibir
+                        memset(buffer, 0, sizeof(buffer));
+
+                        // Recibe dato
+                        recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                        // Agrega el dato a la peticion (lista de strings)
+                        agregar_string(&peticion, &num_peticion, buffer);
+                        // Manda la confirmacion
+                        send(sc_copied, "OK", 2, 0);
+                }
+
                 if (registered(peticion[REGISTER_USERNAME], peticion[REGISTER_ALIAS], users, num_users) == 0){
                         sprintf(buffer, "%d", 1);
                 } // Usuario no registrado
