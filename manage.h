@@ -4,6 +4,8 @@
 #define USERS_PATH "./files/users.txt"
 #define USERS_TEMP_PATH "./files/tmp_users.txt"
 
+#define PENDINGS_PATH "./files/pendings/"
+
 #define DELIM ":;"
 
 #define MAX_LINE 	256
@@ -40,7 +42,6 @@ typedef struct User {
     int connected; // 0 disconnected 1 connected
     char *ip;
     char *port;
-    char **pending;
 } User;
 
 char **split_fields(char *message);
@@ -52,5 +53,7 @@ int remove_user(char *username, User **user_arr, int *num_users);
 int connected(char *alias, User **users, int num_users);
 int fill_connection(char *alias, char* ip, char *port, User **users, int num_users, int mode);
 int agregar_string(char ***array, int *num_elementos, char *nuevo_string);
+int createPendingFile(const char *alias);
+int deletePendingFile(const char *alias);
 
 #endif

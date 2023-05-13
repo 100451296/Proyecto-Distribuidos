@@ -1,15 +1,2 @@
-usuario2,alias2,date2;
-edunavata,edu,22-05-2023;
-Te,Te,29-05-2023;
-T,T,29-05-2023;
-el nano,elna,22-05-2023;
-Tex,Tex,23-05-2023;
-Textsdfsdf,Textsfsd,02-05-2023;
-TextADFSDFADSF,TextFASDFASDFA,05-05-2020;
-Textzzzzzzzzzzzzzzz,Textzzzzzzzzzzzzzzzzzzz,21-05-2023;
-Textssssss,Textssssssss,21-05-2023;
-Textffffffffffffff,Textfffffffffffffffffffff,28-05-2023;
-Textggggggggggggggggggggg,Textgggggggggggggggggggg,29-05-2023;
-Textkkkkkkkkkkkkkkkkkk,Textkkkkkkkkkkkkkkkk,15-05-2023;
-Textqqqqqqqqqqqqqqqqqqqqqq,Textqqqqqqqqqqqqqqqqqqqqqqqq,29-05-2023;
-ahorasiqeusi,ahorasiquesi,23-05-2023;
+edu,edu,22-05-2023
+

@@ -89,6 +89,8 @@ void manage_client(int *sc){
                                 peticion[REGISTER_ALIAS],
                                 peticion[REGISTER_DATE], users, &num_users);
 
+                        createPendingFile(peticion[REGISTER_ALIAS]);
+
                         sprintf(buffer, "%d", 0);
                 } // No se encontro un usuario igual
 
@@ -115,7 +117,10 @@ void manage_client(int *sc){
         
                else{
                         remove_user(peticion[REGISTER_USERNAME], users, &num_users);
+                        deletePendingFile(peticion[REGISTER_ALIAS]);
                         sprintf(buffer, "%d", 0);
+
+                        //deletePendingFile(peticion[REGISTER_ALIAS]);
                 } // Usuario borrado
 
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);

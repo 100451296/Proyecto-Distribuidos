@@ -87,17 +87,19 @@ int remove_user(char* username, User** user_arr, int* num_users) {
             free(user_arr[i]->date);
             free(user_arr[i]->ip);
             free(user_arr[i]->port);
-            free(user_arr[i]->pending);
             free(user_arr[i]);
+            
             // Mover los elementos restantes de la lista un espacio hacia atrás
-            for (int j = i; j < *num_users - 1; j++) {
-                user_arr[j] = user_arr[j + 1];
+            for (int j = i + 1; j < *num_users; j++) {
+                user_arr[j - 1] = user_arr[j];
             }
+            
             (*num_users)--;
             found = 1;
             break;
         }
     }
+    
     // Si se encontró el usuario, actualizar el archivo
     if (found) {
         FILE* f = fopen(USERS_PATH, "w");
@@ -105,14 +107,12 @@ int remove_user(char* username, User** user_arr, int* num_users) {
             printf("Error opening file!\n");
             exit(1);
         }
+        
         // Escribir los usuarios restantes en el archivo
         for (int i = 0; i < *num_users; i++) {
-            fprintf(f, "%s,%s,%s", user_arr[i]->username, user_arr[i]->alias, user_arr[i]->date);
-            if (i < *num_users) {
-                fprintf(f, ";");
-            }
-            fprintf(f, "\n");
+            fprintf(f, "%s,%s,%s\n", user_arr[i]->username, user_arr[i]->alias, user_arr[i]->date);
         }
+        
         fclose(f);
         return 0;
     }
@@ -228,5 +228,35 @@ int agregar_string(char ***array, int *num_elementos, char *nuevo_string) {
     *array = nuevo_array;
     *num_elementos = *num_elementos + 1;
 
+    return 0;
+}
+
+int createPendingFile(const char *alias) {
+    char filename[256];
+    sprintf(filename, "%s%s.txt", PENDINGS_PATH, alias);
+    
+    FILE *file = fopen(filename, "w");
+    if (!file) {
+        printf("Error: Failed to create pending file\n");
+        return -1;
+    }
+    
+    fprintf(file, "This is a pending file for %s\n", alias);
+    
+    fclose(file);
+    printf("Pending file created: %s\n", filename);
+    return 0;
+}
+
+int deletePendingFile(const char *alias) {
+    char filename[256];
+    sprintf(filename, "%s%s.txt", PENDINGS_PATH, alias);
+    
+    if (remove(filename) != 0) {
+        printf("Error: Failed to delete pending file\n");
+        return -1;
+    }
+    
+    printf("Pending file deleted: %s\n", filename);
     return 0;
 }
