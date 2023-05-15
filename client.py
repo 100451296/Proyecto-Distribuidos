@@ -97,8 +97,9 @@ class client :
                 print("error en op")
                 raise "Error en op"
             print("Mensaje:", op)
-
+            
             if op == "SEND_MESSAGE":
+                
                 resetBuffer(conn)
                 alias = readString(conn)
                 if not alias:
@@ -106,6 +107,7 @@ class client :
                     
                 print("Alias:", alias)
                 
+                resetBuffer(conn)
                 resetBuffer(conn)
                 id = readString(conn)
                 if not id:

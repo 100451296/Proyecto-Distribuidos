@@ -240,7 +240,7 @@ void manage_client(int *sc){
                 if (connected(peticion[SEND_DEST], users, num_users) == CONNECTED){
                         // Obtiene IP y puerto e inicializa hp con información del host
                         getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
-                        sendMessage(ip, port);
+                        sendMessage(ip, port, peticion[SEND_DEST]);
 
 
                 }

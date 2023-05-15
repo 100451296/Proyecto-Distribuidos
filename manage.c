@@ -334,28 +334,38 @@ int writePendingMessage(const char* dest, const char* remitente, int id, const c
     return 0;
 }
 
-int extraerUltimaLinea(const char* archivo, int* id, char* remi, char* content) {
+int extraerUltimaLinea(char *dest, int* id, char** remi, char** content) {
+    char archivo[100];
+    snprintf(archivo, sizeof(archivo), "%s%s.txt", PENDINGS_PATH, dest);
+    printf("Abriendo archivo: %s\n", archivo);
+
     FILE* fp = fopen(archivo, "r+");
     if (fp == NULL) {
         printf("Error al abrir el archivo.\n");
         return -1;
     }
 
-    char linea[100];
+    char linea[1024];
     long ultimaPos = -1;
     long posActual;
 
     while (fgets(linea, sizeof(linea), fp) != NULL) {
         posActual = ftell(fp);
-        if (posActual > 0) {  // No es la primera línea
-            ultimaPos = posActual - sizeof(linea);
+        if (linea[0] != '\n') {
+            ultimaPos = posActual - strlen(linea);
         }
     }
 
     if (ultimaPos >= 0) {
         fseek(fp, ultimaPos, SEEK_SET);
-        if (sscanf(linea, "%[^,],%d,%[^,\n]", remi, id, content) == 3) {
-            if (ftruncate(fileno(fp), ultimaPos) == 0) {
+        if (fgets(linea, sizeof(linea), fp) != NULL) {
+            char tempRemi[100];
+            char tempContent[100];
+            if (sscanf(linea, "%99[^,],%d,%99[^\n]", tempRemi, id, tempContent) == 3) {
+                *remi = strdup(tempRemi);
+                *content = strdup(tempContent);
+                fseek(fp, ultimaPos, SEEK_SET);
+                fputs("", fp);  // Borra la última línea escribiendo una cadena vacía
                 fclose(fp);
                 return 0;  // Éxito
             }
@@ -366,12 +376,19 @@ int extraerUltimaLinea(const char* archivo, int* id, char* remi, char* content) 
     return -1;  // Error
 }
 
-int sendMessage(char *ip, char *port){
+int sendMessage(char *ip, char *port, char *dest){
 
     int sd_send;
     int err;
     struct sockaddr_in server_addr;
     struct hostent *hp;
+    int id;
+    char *remi;
+    char *content;
+    //char buffer[MAX_ALIAS_LENGTH];
+    char buffer_alias[1024];
+    char buffer_id[1024];
+    char buffer_content[1024];
 
     // Inicializa el descriptor de socket
     sd_send = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -397,17 +414,27 @@ int sendMessage(char *ip, char *port){
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(atoi(port));
 
+    extraerUltimaLinea(dest, &id, &remi, &content);
+    printf("Valores leidos: %s, %d, %s\n", remi, id, content);
+    fflush(stdout);
+
+    sprintf(buffer_alias, "\n%s\n", remi);
+    sprintf(buffer_id, "\n%d\n", id);
+    sprintf(buffer_content, "\n%s\n", content);
+
     // Intenta conectarse 
     err = connect(sd_send, (struct sockaddr *) &server_addr, sizeof(server_addr));
     if (err == -1) {
             printf("Error en connect\n");
             exit(1);
     }
+    send(sd_send, "\nSEND_MESSAGE", 1024, 0);
 
-    send(sd_send, "\nSEND_MESSAGE\n", 1024, 0);
-    send(sd_send, "\nedu\n", 1024, 0);
-    send(sd_send, "\n89\n", 1024, 0);
-    send(sd_send, "\nklklpasa\n", 1024, 0);
+    send(sd_send, buffer_alias, 1024, 0);
+    send(sd_send, buffer_id, 1024, 0);
+    send(sd_send, buffer_content, 1024, 0);
+
+
     close(sd_send);
     return 0;
 }

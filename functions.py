@@ -19,6 +19,7 @@ def readString(sock):
     a = ''
     while True:
         msg = sock.recv(1).decode("utf-8")
+        print(msg)
         if not msg:
             # Si no se recibió nada, se cerró la conexión
             return None
@@ -36,6 +37,7 @@ def resetBuffer(connection):
     try:
         while True:
             data = connection.recv(1)
+            print(data)
             if data == b'\n':
                 break
             if not data:
