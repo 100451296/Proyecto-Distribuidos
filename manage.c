@@ -436,5 +436,37 @@ int sendMessage(char *ip, char *port, char *dest){
 
 
     close(sd_send);
+    //borrarUltimaLinea(dest);
     return 0;
+}
+
+void borrarUltimaLinea(char* dest) {
+
+    char nombreArchivo[100];
+    snprintf(nombreArchivo, sizeof(nombreArchivo), "%s%s.txt", PENDINGS_PATH, dest);
+    printf("Abriendo archivo: %s\n", nombreArchivo);
+
+    FILE* archivo = fopen(nombreArchivo, "r+");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    // Buscar el final del archivo
+    fseek(archivo, 0, SEEK_END);
+    long tamañoArchivo = ftell(archivo);
+
+    // Buscar el inicio de la última línea
+    long posición = tamañoArchivo;
+    while (posición > 0) {
+        fseek(archivo, --posición, SEEK_SET);
+        if (fgetc(archivo) == '\n') {
+            break;
+        }
+    }
+
+    // Truncar el archivo en la posición de la última línea
+    ftruncate(fileno(archivo), posición);
+
+    fclose(archivo);
 }
