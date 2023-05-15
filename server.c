@@ -85,7 +85,7 @@ void manage_client(int *sc){
                 }
                 
                 if (registered(peticion[REGISTER_ALIAS], users, num_users) == 1){
-                        sprintf(buffer, "%d", 1);
+                        sprintf(buffer, "\n%d", 1);
                 } // Usuario registrado
         
                else{
@@ -94,8 +94,8 @@ void manage_client(int *sc){
                                 peticion[REGISTER_DATE], users, &num_users);
 
                         createPendingFile(peticion[REGISTER_ALIAS]);
-
-                        sprintf(buffer, "%d", 0);
+                        
+                        sprintf(buffer, "\n%d", 0);
                 } // No se encontro un usuario igual
 
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
@@ -116,13 +116,13 @@ void manage_client(int *sc){
                 }
 
                 if (registered(peticion[REGISTER_ALIAS], users, num_users) == 0){
-                        sprintf(buffer, "%d", 1);
+                        sprintf(buffer, "\n%d", 1);
                 } // Usuario no registrado
         
                else{
                         remove_user(peticion[REGISTER_USERNAME], users, &num_users);
                         deletePendingFile(peticion[REGISTER_ALIAS]);
-                        sprintf(buffer, "%d", 0);
+                        sprintf(buffer, "\n%d", 0);
 
                         //deletePendingFile(peticion[REGISTER_ALIAS]);
                 } // Usuario borrado
@@ -144,7 +144,7 @@ void manage_client(int *sc){
                 }
                 err = fill_connection(peticion[CONNECTED_ALIAS], client_ip, peticion[CONNECTED_PORT], 
                                 users, num_users, CONNECTED);
-                sprintf(buffer, "%d", err);
+                sprintf(buffer, "\n%d", err);
 
                 switch(err){
                         case 0: 
@@ -175,7 +175,7 @@ void manage_client(int *sc){
                 }
                 err = fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
                                 users, num_users, DISCONNECTED);
-                sprintf(buffer, "%d", err);
+                sprintf(buffer, "\n%d", err);
 
                 switch(err){
                         case 0: 
@@ -205,14 +205,14 @@ void manage_client(int *sc){
                 }
                 if (registered(peticion[SEND_REMI], users, num_users) == 0 ||
                     registered(peticion[SEND_DEST], users, num_users) == 0){
-                        sprintf(buffer, "%d", -1); // Alguno de los dos usuarios no está registrado
+                        sprintf(buffer, "\n%d", -1); // Alguno de los dos usuarios no está registrado
                         printf("No estanb registrados %s , %s\n", peticion[SEND_DEST], peticion[SEND_REMI]);
                     }
                 else{
                         printf("Actualizando id\n");
                         id = updateID(peticion[SEND_REMI], users, num_users);
                         writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]);
-                        sprintf(buffer, "%d", 0);
+                        sprintf(buffer, "\n%d", 0);
                 }
 
                 switch(atoi(buffer)){
@@ -250,7 +250,7 @@ void manage_client(int *sc){
         }
         else{
                printf("Comando desconcoido\n");
-               sprintf(buffer, "%d", -1); 
+               sprintf(buffer, "\n%d", -1); 
         }
 
         pthread_mutex_unlock(&mutex_users); // Fin sección critica users

@@ -9,8 +9,8 @@ def formatPetition(socket, *args):
     for i in range(len(args)):
         peticion = args[i] + "\0"
         print(peticion)
-        res = socket.sendall(peticion.encode("utf-8"))
-        confirmacion = socket.recv(1024).decode("utf-8")
+        res = socket.sendall(peticion.encode('utf-8'))
+        confirmacion = socket.recv(1024).decode('utf-8')
         print("Recibido", confirmacion)
     
     return confirmacion # Se ha enviado todo el contenido
@@ -18,7 +18,7 @@ def formatPetition(socket, *args):
 def readString(sock):
     a = ''
     while True:
-        msg = sock.recv(1).decode("utf-8")
+        msg = sock.recv(1).decode('utf-8')
         print(msg)
         if not msg:
             # Si no se recibió nada, se cerró la conexión
@@ -28,7 +28,6 @@ def readString(sock):
             # Si se recibió el carácter nulo, se terminó de recibir el mensaje
             a = a.split('\0')[0]
             break
-        
     return a
 
 def resetBuffer(connection):

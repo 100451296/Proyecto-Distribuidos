@@ -50,6 +50,7 @@ class client :
         # Generamos petición para mandar 
         message = formatPetition(connection, client.OP_REGISTER, client._username, user, client._date)
 
+        resetBuffer(connection)
         result = readString(connection)
         connection.close()
 
@@ -76,7 +77,7 @@ class client :
 
         message = formatPetition(connection, client.OP_UNREGISTER, client._username, user, client._date)
 
-
+        resetBuffer(connection)
         result = readString(connection)
         connection.close()
 
@@ -107,7 +108,6 @@ class client :
                     
                 print("Alias:", alias)
                 
-                
                 resetBuffer(conn)
                 id = readString(conn)
                 if not id:
@@ -121,7 +121,6 @@ class client :
                     print("error en content")
                     
                 print("Content:", content)
-                
 
         except Exception as e:
             print("Error:", e)
@@ -169,6 +168,7 @@ class client :
         message = formatPetition(connection, client.OP_CONNECT, client._alias, str(port))
         #connection.sendall(message.encode("utf-8"))
 
+        resetBuffer(connection)
         result = readString(connection)
         connection.close()
 
@@ -198,6 +198,7 @@ class client :
         message = formatPetition(connection,client.OP_DISCONNECT, client._alias)
         #connection.sendall(message.encode("utf-8"))
 
+        resetBuffer(connection)
         result = readString(connection)
         connection.close()
 
@@ -234,17 +235,16 @@ class client :
         # Generamos petición para mandar 
         message = formatPetition(connection, client.OP_SEND, client._username, user, message)
 
+        resetBuffer(connection)
         result = readString(connection)
         resetBuffer(connection)
+
         id = readString(connection)[:-1]
-        
- 
         
         # ******* Retroalimentación a interfaz  ******* #
         # Todo bien
         if result == '0':
             window['_SERVER_'].print(f"s> SEND MESSAGE {id} OK")
-            
         elif result == '1':
             window['_SERVER_'].print("s> USER " + user + " DOES NOT EXIST")
         elif result == '2':
