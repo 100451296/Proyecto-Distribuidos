@@ -236,7 +236,7 @@ class client :
 
         result = readString(connection)
         resetBuffer(connection)
-        id = readString(connection)[:-1]
+        id = readString(connection)
         
  
         
