@@ -107,7 +107,7 @@ class client :
                     
                 print("Alias:", alias)
                 
-                resetBuffer(conn)
+                
                 resetBuffer(conn)
                 id = readString(conn)
                 if not id:
