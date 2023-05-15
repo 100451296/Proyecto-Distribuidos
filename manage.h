@@ -67,5 +67,7 @@ int increaseId(char *alias, User **users, int num_users);
 unsigned int incrementAndReset(unsigned int value);
 int updateID(char *alias, User **users, int num_users);
 int updateUsers();
+int getUserPortIP(char *alias, char **ip, char **port, User **users, int num_users);
+int extraerUltimaLinea(const char* archivo, int* id, char* remi, char* content);
 
 #endif

@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include "manage.h"
+#include <netdb.h>
 
 pthread_mutex_t mutex_socket = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_users = PTHREAD_MUTEX_INITIALIZER;
@@ -26,10 +27,17 @@ void manage_client(int *sc){
         int i = 0;
         unsigned int id;
         char send_buffer[MAX_LINE_LENGTH];
+        int sd_send;
+        struct sockaddr_in server_addr;
+        struct hostent *hp;
+        char *ip = NULL;
+        char *port = NULL;
+        int err;
+        char *client_ip;
 
         pthread_mutex_lock(&mutex_socket);
         sc_copied = *sc; 
-        //client_ip = strdup(inet_ntoa(client_addr.sin_addr));
+        client_ip = strdup(inet_ntoa(client_addr.sin_addr));
         copied = 1;
         pthread_cond_signal(&cond_copied);
         pthread_mutex_unlock(&mutex_socket);
@@ -140,9 +148,20 @@ void manage_client(int *sc){
                         // Manda la confirmacion
                         send(sc_copied, "OK", 2, 0);
                 }
-               sprintf(buffer, "%d", 
-                fill_connection(peticion[CONNECTED_ALIAS], NULL, peticion[CONNECTED_PORT], 
-                                users, num_users, CONNECTED));
+                err = fill_connection(peticion[CONNECTED_ALIAS], client_ip, peticion[CONNECTED_PORT], 
+                                users, num_users, CONNECTED);
+                sprintf(buffer, "%d", err);
+
+                switch(err){
+                        case 0: 
+                                printf("s> CONNECT %s OK", peticion[CONNECTED_ALIAS]);
+                                break;
+                        case 1:
+                                printf("s> CONNECT %s FAIL", peticion[CONNECTED_ALIAS]);
+                                break;
+                        default:
+                                break;
+                }
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
 
                 // TO DO: Enviar todos los mensajes pendientes 
@@ -160,10 +179,21 @@ void manage_client(int *sc){
                         // Manda la confirmacion
                         send(sc_copied, "OK", 2, 0);
                 }
+                err = fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
+                                users, num_users, DISCONNECTED);
+                sprintf(buffer, "%d", err);
 
-               sprintf(buffer, "%d", 
-                fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
-                                users, num_users, DISCONNECTED));
+                switch(err){
+                        case 0: 
+                                printf("s> DISCONNECT %s OK", peticion[CONNECTED_ALIAS]);
+                                break;
+                        case 1:
+                                printf("s> DISCONNECT %s FAIL", peticion[CONNECTED_ALIAS]);
+                                break;
+                        default:
+                                break;
+                }
+
                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
         }
 
@@ -213,6 +243,45 @@ void manage_client(int *sc){
                                 send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
                                 break;
                                 
+                }
+
+                if (connected(peticion[SEND_DEST], users, num_users) == CONNECTED){
+                        // Inicializa el descriptor de socket
+                        sd_send = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+                        if (sd_send < 0){
+                                perror("Error in socket");
+                                exit(1);
+                        }
+                        
+                        // Inicializa estructura de servidor
+                        bzero((char *)&server_addr, sizeof(server_addr));
+
+                        // Obtiene IP y puerto e inicializa hp con información del host
+                        getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
+
+                        printf("IP: %s Port: %s\n", ip, port);
+                        hp = gethostbyname(ip);
+                        if (hp == NULL) {
+                                perror("Error en gethostbyname");
+                                exit(1);
+                        }
+                        
+                        // Copia en estructura del servidor información del host
+                        memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+                        server_addr.sin_family = AF_INET;
+                        server_addr.sin_port = htons(atoi(port));
+
+                        // Intenta conectarse 
+                        err = connect(sd_send, (struct sockaddr *) &server_addr, sizeof(server_addr));
+                        if (err == -1) {
+                                printf("Error en connect\n");
+                                exit(1);
+                        }
+
+                        close(sd_send);
+
+
+
                 }
                         
                 

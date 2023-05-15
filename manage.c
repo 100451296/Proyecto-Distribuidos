@@ -3,7 +3,7 @@
 #include <string.h>
 #include "manage.h"
 #include <limits.h>
-
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -168,16 +168,31 @@ int registered(const char *alias, User **users, int num_users){
 }
 
 int connected(char *alias, User **users, int num_users){
+    // Devuelve 1 si el alias esta conectado y  0 en caso contrario
+    int i;
+
+    for(i = 0; i < num_users; i++){
+            if (users[i]->connected == CONNECTED && strcmp(users[i]->alias, alias) == 0){
+                    return 1; // connected
+            } 
+    } 
+    
+    return 0; // no connected
+}
+
+int getUserPortIP(char *alias, char **ip, char **port, User **users, int num_users){
     // Devuelve 1 si existe 0 si no existe
     int i;
 
     for(i = 0; i < num_users; i++){
-            if (users[i]->connected == CONNECTED){
-                    return 1;
+            if (users[i]->connected == CONNECTED && strcmp(users[i]->alias, alias) == 0){
+                    *ip = strdup(users[i]->ip);
+                    *port = strdup(users[i]->port);
+                    return 0; // found and connected
             } 
-    } 
-    
-    return 0;
+    }
+
+    return -1;
 }
 
 int fill_connection(char *alias, char* ip, char *port, User **users, int num_users, int mode){
@@ -190,7 +205,7 @@ int fill_connection(char *alias, char* ip, char *port, User **users, int num_use
                 
                 else{
                     if (mode == CONNECTED){ // Queremos conectar al usuario
-                        users[i]->ip = strdup(alias);
+                        users[i]->ip = strdup(ip);
                         users[i]->port = strdup(port);
                     } // Asginamos ip y port 
 
@@ -314,4 +329,36 @@ int writePendingMessage(const char* dest, const char* remitente, int id, const c
     fclose(file);
     printf("Message written to file: %s\n", filename);
     return 0;
+}
+
+int extraerUltimaLinea(const char* archivo, int* id, char* remi, char* content) {
+    FILE* fp = fopen(archivo, "r+");
+    if (fp == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return -1;
+    }
+
+    char linea[100];
+    long ultimaPos = -1;
+    long posActual;
+
+    while (fgets(linea, sizeof(linea), fp) != NULL) {
+        posActual = ftell(fp);
+        if (posActual > 0) {  // No es la primera línea
+            ultimaPos = posActual - sizeof(linea);
+        }
+    }
+
+    if (ultimaPos >= 0) {
+        fseek(fp, ultimaPos, SEEK_SET);
+        if (sscanf(linea, "%[^,],%d,%[^,\n]", remi, id, content) == 3) {
+            if (ftruncate(fileno(fp), ultimaPos) == 0) {
+                fclose(fp);
+                return 0;  // Éxito
+            }
+        }
+    }
+
+    fclose(fp);
+    return -1;  // Error
 }
