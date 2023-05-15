@@ -89,7 +89,7 @@ class client :
         return client.RC.ERROR
 
     @staticmethod
-    def handleConnection(conn, addr):
+    def handleConnection(conn, addr, window):
         print('Conectado por', addr)
         try:
             resetBuffer(conn)
@@ -121,6 +121,7 @@ class client :
                     print("error en content")
                     
                 print("Content:", content)
+                window['_SERVER_'].print(f"s> MESSAGE {id} FROM {alias} {content} END")
 
         except Exception as e:
             print("Error:", e)
@@ -128,14 +129,14 @@ class client :
         conn.close()
 
     @staticmethod
-    def recvMessages(socket):
+    def recvMessages(socket, window):
         socket.settimeout(10)  # tiempo de espera para recibir conexiones
         while client._connected:
             socket.listen(1)
             print("Estoy")
             try:
                 conn, addr = socket.accept()
-                t = threading.Thread(target=client.handleConnection, args=(conn, addr))
+                t = threading.Thread(target=client.handleConnection, args=(conn, addr, window))
                 t.start()
             except Exception as e:
                 pass  # seguir esperando conexiones
@@ -158,7 +159,7 @@ class client :
         
         if client._thread == None:
             client._connected = True
-            client._thread = threading.Thread(target=client.recvMessages, args=(socketMessages,))
+            client._thread = threading.Thread(target=client.recvMessages, args=(socketMessages, window))
             # target=client.recvMessages xq recvMessages es staticmethod
             client._thread.start()
 
