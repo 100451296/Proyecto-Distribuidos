@@ -19,22 +19,23 @@ def readString(sock):
     a = ''
     while True:
         msg = sock.recv(1).decode("utf-8")
-        print(msg)
         if not msg:
             # Si no se recibió nada, se cerró la conexión
             return None
         a += msg
         if '\0' in msg:
             # Si se recibió el carácter nulo, se terminó de recibir el mensaje
+            a = a.split('\0')[0]
             break
-    return a.split('\0')[0]
+        elif '\n' in msg:
+            a = a.split('\n')[0]
+    return a
 
 def resetBuffer(connection):
     connection.settimeout(100) # Establece un tiempo de espera de 5 segundos
     try:
         while True:
             data = connection.recv(1)
-            print(data)
             if data == b'\n':
                 break
             if not data:

@@ -87,20 +87,58 @@ class client :
 
         return client.RC.ERROR
 
-    # Funcion que usa hilo creado por connect()
+    @staticmethod
+    def handleConnection(conn, addr):
+        print('Conectado por', addr)
+        try:
+            resetBuffer(conn)
+            op = readString(conn)
+            if not op:
+                print("error en op")
+                raise "Error en op"
+            print("Mensaje:", op)
+
+            if op == "SEND_MESSAGE":
+                resetBuffer(conn)
+                alias = readString(conn)
+                if not alias:
+                    print("error en alias")
+                    
+                print("Alias:", alias)
+                
+                resetBuffer(conn)
+                id = readString(conn)
+                if not id:
+                    print("error en id")
+                    
+                print("id:", id)
+                
+                resetBuffer(conn)
+                content = readString(conn)
+                if not content:
+                    print("error en content")
+                    
+                print("Content:", content)
+                
+
+        except Exception as e:
+            print("Error:", e)
+            
+        conn.close()
+
     @staticmethod
     def recvMessages(socket):
-        socket.settimeout(1)  # tiempo de espera para recibir conexiones
+        socket.settimeout(10)  # tiempo de espera para recibir conexiones
         while client._connected:
             socket.listen(1)
             print("Estoy")
             try:
                 conn, addr = socket.accept()
-                print('Conectado por', addr)
-                # procesar conexión
+                t = threading.Thread(target=client.handleConnection, args=(conn, addr))
+                t.start()
             except Exception as e:
                 pass  # seguir esperando conexiones
-        print("Salhgo")
+        print("Salgo")
         socket.close()
 
     # *

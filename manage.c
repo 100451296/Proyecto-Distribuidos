@@ -4,9 +4,12 @@
 #include "manage.h"
 #include <limits.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
 
 User **read_users_from_file(int *num_users) {
     FILE *fp = fopen(USERS_PATH, "r");
@@ -361,4 +364,50 @@ int extraerUltimaLinea(const char* archivo, int* id, char* remi, char* content) 
 
     fclose(fp);
     return -1;  // Error
+}
+
+int sendMessage(char *ip, char *port){
+
+    int sd_send;
+    int err;
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+
+    // Inicializa el descriptor de socket
+    sd_send = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sd_send < 0){
+            perror("Error in socket");
+            return -1;
+    }
+    
+    // Inicializa estructura de servidor
+    bzero((char *)&server_addr, sizeof(server_addr));
+
+   
+
+    printf("IP: %s Port: %s\n", ip, port);
+    hp = gethostbyname(ip);
+    if (hp == NULL) {
+            perror("Error en gethostbyname");
+            exit(1);
+    }
+    
+    // Copia en estructura del servidor información del host
+    memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(atoi(port));
+
+    // Intenta conectarse 
+    err = connect(sd_send, (struct sockaddr *) &server_addr, sizeof(server_addr));
+    if (err == -1) {
+            printf("Error en connect\n");
+            exit(1);
+    }
+
+    send(sd_send, "\nSEND_MESSAGE\n", 1024, 0);
+    send(sd_send, "\nedu\n", 1024, 0);
+    send(sd_send, "\n89\n", 1024, 0);
+    send(sd_send, "\nklklpasa\n", 1024, 0);
+    close(sd_send);
+    return 0;
 }

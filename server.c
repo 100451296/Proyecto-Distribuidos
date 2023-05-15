@@ -27,9 +27,6 @@ void manage_client(int *sc){
         int i = 0;
         unsigned int id;
         char send_buffer[MAX_LINE_LENGTH];
-        int sd_send;
-        struct sockaddr_in server_addr;
-        struct hostent *hp;
         char *ip = NULL;
         char *port = NULL;
         int err;
@@ -61,8 +58,6 @@ void manage_client(int *sc){
 
         // Trocea la peticion y reinicia buffer
         agregar_string(&peticion, &num_peticion, buffer);
-        
-        printf("Mensaje recibido: %s\noeticion: %s\n", buffer, peticion[0]);
 
         if (peticion == NULL){
                 printf("Se envió un petición vacía");
@@ -76,7 +71,6 @@ void manage_client(int *sc){
 
         //Tratamiento peticion REGISTER
         if (strcmp(peticion[0],"REGISTER") == 0){
-                printf("Register\n");
                 // Pone la zona de memoria del buffer todo a 0 y recibe
                 for (i = 0; i < NUM_REGISTER; i++){
                         // Reinicia buffer para recibir
@@ -198,7 +192,6 @@ void manage_client(int *sc){
         }
 
         else if (strcmp(peticion[0], "SEND") == 0){
-                printf("Entro a send\n");
                 for (i = 0; i < NUM_SEND; i++){
                         // Reinicia buffer para recibir
                         memset(buffer, 0, sizeof(buffer));
@@ -210,7 +203,6 @@ void manage_client(int *sc){
                         // Manda la confirmacion
                         send(sc_copied, "OK", 2, 0);
                 }
-                printf("Argumentos recibidos\n");
                 if (registered(peticion[SEND_REMI], users, num_users) == 0 ||
                     registered(peticion[SEND_DEST], users, num_users) == 0){
                         sprintf(buffer, "%d", -1); // Alguno de los dos usuarios no está registrado
@@ -246,40 +238,9 @@ void manage_client(int *sc){
                 }
 
                 if (connected(peticion[SEND_DEST], users, num_users) == CONNECTED){
-                        // Inicializa el descriptor de socket
-                        sd_send = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-                        if (sd_send < 0){
-                                perror("Error in socket");
-                                exit(1);
-                        }
-                        
-                        // Inicializa estructura de servidor
-                        bzero((char *)&server_addr, sizeof(server_addr));
-
                         // Obtiene IP y puerto e inicializa hp con información del host
                         getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
-
-                        printf("IP: %s Port: %s\n", ip, port);
-                        hp = gethostbyname(ip);
-                        if (hp == NULL) {
-                                perror("Error en gethostbyname");
-                                exit(1);
-                        }
-                        
-                        // Copia en estructura del servidor información del host
-                        memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
-                        server_addr.sin_family = AF_INET;
-                        server_addr.sin_port = htons(atoi(port));
-
-                        // Intenta conectarse 
-                        err = connect(sd_send, (struct sockaddr *) &server_addr, sizeof(server_addr));
-                        if (err == -1) {
-                                printf("Error en connect\n");
-                                exit(1);
-                        }
-
-                        close(sd_send);
-
+                        sendMessage(ip, port);
 
 
                 }
@@ -352,13 +313,11 @@ int main(int argc, char *argv[])
                 size = sizeof(client_addr);
                 
                 // Realiza la conexion antes de entrar al bucle
-                printf("esperando conexion\n");
                 sc = accept(sd, (struct sockaddr *)&client_addr, (socklen_t *)&size);
                 if (sc == -1) {
                         printf("Error en accept\n");
                         return -1;
                 }
-                printf("***********\nconexión aceptada de IP: %s   Puerto: %d\n***********\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
                 if (pthread_create(&thid, &t_attr, (void *)manage_client, (void *)&sc) == 0){
                         pthread_mutex_lock(&mutex_socket);
