@@ -5,6 +5,7 @@ from enum import Enum
 import argparse
 import socket
 from functions import *
+import requests
 import threading
 
 class client :
@@ -275,6 +276,9 @@ class client :
     @staticmethod
     def send(user, message, window):
         # Formateamos mensaje con Servicio Web
+        response = requests.post('http://localhost:4222/normal_text', data={'message': message})
+        formatted_message = response.text
+        message = formatted_message
 
 
         # Mensaje de salida
