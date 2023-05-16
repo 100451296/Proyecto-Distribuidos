@@ -357,7 +357,6 @@ int createPendingFile(const char *alias) {
     }
     
     fclose(file);
-    printf("Pending file created: %s\n", filename);
     return 0;
 }
 
@@ -370,7 +369,6 @@ int deletePendingFile(const char *alias) {
         return -1;
     }
     
-    printf("Pending file deleted: %s\n", filename);
     return 0;
 }
 
@@ -388,14 +386,12 @@ int writePendingMessage(const char* dest, const char* remitente, int id, const c
     fprintf(file, "%s,%d,%s\n", remitente, id, content);
 
     fclose(file);
-    printf("Message written to file: %s\n", filename);
     return 0;
 }
 
 int extraerUltimaLinea(char *dest, int* id, char** remi, char** content) {
     char archivo[100];
     snprintf(archivo, sizeof(archivo), "%s%s.txt", PENDINGS_PATH, dest);
-    printf("Abriendo archivo: %s\n", archivo);
 
     FILE* fp = fopen(archivo, "r+");
     if (fp == NULL) {
@@ -461,7 +457,7 @@ int sendMessage(char *ip, char *port, char *dest){
 
    
 
-    printf("IP: %s Port: %s\n", ip, port);
+    
     hp = gethostbyname(ip);
     if (hp == NULL) {
             perror("Error en gethostbyname");
@@ -478,8 +474,6 @@ int sendMessage(char *ip, char *port, char *dest){
     }
     
     extraerUltimaLinea(dest, &id, &remi, &content);
-    printf("Valores leidos: %s, %d, %s\n", remi, id, content);
-    fflush(stdout);
 
     sprintf(buffer_alias, "%s", remi);
     sprintf(buffer_id, "%d", id);
@@ -533,7 +527,6 @@ int sendMessage(char *ip, char *port, char *dest){
 int borrarUltimaLinea(char* dest) {
     char nombreArchivo[100];
     snprintf(nombreArchivo, sizeof(nombreArchivo), "%s%s.txt", PENDINGS_PATH, dest);
-    printf("Abriendo archivo: %s\n", nombreArchivo);
 
     FILE* archivo = fopen(nombreArchivo, "r");
     if (archivo == NULL) {
@@ -592,7 +585,6 @@ int isEmpty(char* dest){
 
     char nombreArchivo[100];
     snprintf(nombreArchivo, sizeof(nombreArchivo), "%s%s.txt", PENDINGS_PATH, dest);
-    printf("Abriendo archivo: %s\n", nombreArchivo);
 
     FILE* archivo = fopen(nombreArchivo, "r");
     if (archivo == NULL) {

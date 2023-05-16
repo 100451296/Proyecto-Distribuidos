@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include "manage.h"
 #include <netdb.h>
+#include <netinet/in.h>
 
 pthread_mutex_t mutex_socket = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_users = PTHREAD_MUTEX_INITIALIZER;
@@ -374,6 +375,9 @@ int main(int argc, char *argv[])
         struct sockaddr_in server_addr;
         pthread_t thid;
         pthread_attr_t t_attr;
+        char host[256];
+        char *IP;
+        struct hostent *host_entry;
 
         // Verificar si se proporcionó el argumento -p y su valor
         if (argc < 3 || strcmp(argv[1], "-p") != 0 || !isNumber(argv[2])) {
@@ -408,7 +412,7 @@ int main(int argc, char *argv[])
         server_addr.sin_addr.s_addr = INADDR_ANY;
         server_addr.sin_port        = htons(port);
 
-        printf("server port: %d\n", server_addr.sin_port);
+      
 
         // Asigna la dirección y puerto al socket del servidor
         err = bind(sd, (const struct sockaddr *)&server_addr, sizeof(server_addr));
@@ -417,9 +421,14 @@ int main(int argc, char *argv[])
                 return -1;
         }
 
+        gethostname(host, sizeof(host));
+        host_entry = gethostbyname(host);
+        IP = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+
         // Se conifguran los atirbutos del hilo para que no tengan que esperar
         pthread_attr_init(&t_attr);
         pthread_attr_setdetachstate(&t_attr, PTHREAD_CREATE_DETACHED);
+        printf("s> init server %s:%d\n", IP, port);
         while (1){
                 // Pone al socket en espera de recibir conexiones
                 err = listen(sd, SOMAXCONN);
