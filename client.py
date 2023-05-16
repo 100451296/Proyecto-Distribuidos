@@ -44,6 +44,10 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def register(user, window):
+        # Mensaje de salida
+        window['_CLIENT_'].print("c> REGISTER "+ client._username)
+        print(f"c> REGISTER {client._username}")
+
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
@@ -59,12 +63,18 @@ class client :
         connection.close()
 
         # Mensaje de resultado de conexion
+        # Ejecutó con éxito
         if result == "0":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " OK")
+        # Usuario ya registrado 
         elif result == "1":
+            window['_SERVER_'].print("s> REGISTER "+ client._username + " IN USE")
+        # Otros
+        elif result == "2":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " FAIL")
+        # Unknown       
         else:
-            window['_SERVER_'].print("s> REGISTER FAIL CONNECTION res: " + result )
+            window['_SERVER_'].print("s> REGISTER FAIL UNKNOWN - " + result )
         return client.RC.ERROR
 
     # *
@@ -75,6 +85,9 @@ class client :
     # 	 * @return ERROR if another error occurred
     @staticmethod
     def  unregister(user, window):
+        # Mensaje de salida
+        window['_CLIENT_'].print("c> UNREGISTER "+ client._username)
+        print(f"UNREGISTER {client._username}")
         
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
@@ -87,13 +100,18 @@ class client :
         print(result)
 
         connection.close()
-
+        # Exito
         if result == "0":
             window['_SERVER_'].print("s> UNREGISTER "+ client._username + " OK")
+        # User no existe
         elif result == "1":
+            window['_SERVER_'].print("s> USER "+ client._username + " DOES NOT EXIST")
+        # Otros
+        elif result == "2":
             window['_SERVER_'].print("s> UNREGISTER "+ client._username + " FAIL")
+        # Unknown
         else:
-            window['_SERVER_'].print("s> UNREGISTER FAIL CONNECTION")
+            window['_SERVER_'].print("s> UNREGISTER FAIL UNKNOWN - " + result )
         return client.RC.ERROR
 
     @staticmethod
@@ -103,29 +121,36 @@ class client :
             op = conn.recv(1024).decode("utf-8")
             conn.sendall("OK\0".encode())
             if not op:
-                print("error en op")
+                print("error en op\n")
                 raise "Error en op"
             print("Mensaje:", op)
             
             if op == "SEND_MESSAGE":
                 
                 alias = conn.recv(1024).decode("utf-8")
-                conn.sendall("OK\0".encode())
                 if not alias:
-                    print("error en alias")
+                    print("error en alias\n")
+                    conn.sendall("ER\0".encode())
+                else:
+                    conn.sendall("OK\0".encode())
                     
                 print("Alias:", alias)
 
                 id = conn.recv(1024).decode("utf-8")
-                conn.sendall("OK\0".encode())
                 if not id:
-                    print("error en id")
+                    print("error en id\n")
+                    conn.sendall("ER\0".encode())
+                else:
+                    conn.sendall("OK\0".encode())
                     
                 print("id:", id)
 
                 content = conn.recv(1024).decode("utf-8")
                 if not content:
-                    print("error en content")
+                    print("error en content\n")
+                    conn.sendall("ER\0".encode())
+                else:
+                    conn.sendall("OK\0".encode())
                     
                 print("Content:", content)
                 window['_SERVER_'].print(f"s> MESSAGE {id} FROM {alias} {content} END")
@@ -137,17 +162,15 @@ class client :
 
     @staticmethod
     def recvMessages(socket, window):
-        socket.settimeout(10)  # tiempo de espera para recibir conexiones
+        socket.settimeout(2)  # tiempo de espera para recibir conexiones
         while client._connected:
             socket.listen(1)
-            print("Estoy")
             try:
                 conn, addr = socket.accept()
                 t = threading.Thread(target=client.handleConnection, args=(conn, addr, window))
                 t.start()
             except Exception as e:
                 pass  # seguir esperando conexiones
-        print("Salgo")
         socket.close()
 
     # *
@@ -160,6 +183,10 @@ class client :
     # Crea el hilo 
     @staticmethod
     def connect(user, window):
+        # Mensaje de salida
+        window['_CLIENT_'].print("c> CONNECT "+ client._username)
+        print(f"CONNECT {client._username}")
+
         socketMessages = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socketMessages.bind(('localhost', 0)) # 0: que busque puerto disponible
         host, port = socketMessages.getsockname()
@@ -183,11 +210,16 @@ class client :
 
 
         connection.close()
-
+        # Exito 
         if result == "0":
             window['_SERVER_'].print("s> CONNECT " + client._username + " OK")
+        # Usuario no registrado
         elif result == "1":
             window['_SERVER_'].print("s> CONNECT FAIL, USER DOES NOT EXIST")
+        # Usuario ya conectado
+        elif result == "2":
+            window['_SERVER_'].print("s> USER ALREADY CONNECTED")
+        # Otros
         elif result == "2":
             window['_SERVER_'].print("s> USER ALREADY CONNECTED")
         else:
