@@ -50,10 +50,7 @@ class client :
         # Generamos petición para mandar 
         message = formatPetition(connection, client.OP_REGISTER, client._username, user, client._date)
       
-        # result = connection.recv(1024).decode()
-        # print('res' ,result)
-        
-        # connection.close()
+        connection.sendall("OK\0".encode())
 
         temp_result = connection.recv(1024)
         print('temp_res:',temp_result)
@@ -85,6 +82,8 @@ class client :
 
         message = formatPetition(connection, client.OP_UNREGISTER, client._alias)
 
+        connection.sendall("OK\0".encode())
+        
         result = connection.recv(1024).decode("utf-8")
         print(result)
 
