@@ -252,8 +252,7 @@ class client :
 
         result = connection.recv(1024).decode("utf-8")
 
-        connection.close()
-
+        
         # ******* Retroalimentación a interfaz  ******* #
         # Todo bien
         if result == '0':
@@ -266,7 +265,8 @@ class client :
         elif result == '2':
             window['_SERVER_'].print("s> SEND FAIL")
 
-        
+        connection.close()
+
         return client.RC.ERROR
 
     # *
@@ -292,7 +292,7 @@ class client :
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         # Formateamos petición y mandamos a servidor 
-        message = formatPetition(connection, client.OP_CONNECTEDUSERS)
+        message = formatPetition(connection, client.OP_CONNECTEDUSERS, client._alias)
         #connection.sendall(message.encode("utf-8"))
         connection.sendall("OK\0".encode())
 
@@ -315,7 +315,7 @@ class client :
         elif result == '2':
             window['_SERVER_'].print("s> CONNECTED USERS FAIL")
         else:
-            window['_SERVER_'].print("s> CONNECTED FAIL UNKNOWN res"+ result)
+            window['_SERVER_'].print("s> CONNECTED FAIL UNKNOWN "+ result)
         return client.RC.ERROR
 
 

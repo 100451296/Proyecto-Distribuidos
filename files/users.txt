@@ -1,7 +1,7 @@
-edu,edu,29-05-2023,15;
+edu,edu,29-05-2023,28;
 Textasdasdasdas,Textasdasdasdasdasd,29-05-2023,0;
 apsdjmdjmásd,asdsjkhbadljkhabsd,18-05-2023,0;
 ADA,ADA,22-05-2023,0;
 florentino,floren,19-05-2023,0;
 mria,maria,23-05-2023,0;
-maria,,mria,23-05-2023,0;
+maria,mria,23-05-2023,0;

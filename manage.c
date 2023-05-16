@@ -171,7 +171,7 @@ int registered(const char *alias, User **users, int num_users){
 }
 
 int connected(char *alias, User **users, int num_users){
-    
+
     // Devuelve 1 si el alias esta conectado y  0 en caso contrario
     int i;
 
@@ -474,7 +474,7 @@ int sendMessage(char *ip, char *port, char *dest){
     err = connect(sd_send, (struct sockaddr *) &server_addr, sizeof(server_addr));
     if (err == -1) {
             printf("Error en connect\n");
-            exit(1);
+            return -1;
     }
     send(sd_send, "SEND_MESSAGE\0", strlen("SEND_MESSAGE\0"), 0);
 

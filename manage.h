@@ -35,6 +35,8 @@
 #define SEND_DEST 2
 #define SEND_CONTENT 3
 
+#define CONNECTEDUSERS_ALIAS 1
+
 
 // NUMERO PARAMETROS POR PETICION
 #define NUM_REGISTER 3
@@ -42,7 +44,7 @@
 #define NUM_CONNECT 2
 #define NUM_DISCONNECT 1
 #define NUM_SEND 3
-#define NUM_CONNECTEDUSERS 0
+#define NUM_CONNECTEDUSERS 1
 
 
 typedef struct User {

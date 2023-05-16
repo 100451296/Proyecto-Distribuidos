@@ -272,48 +272,82 @@ void manage_client(int *sc){
         else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
                 printf("connectedUsers\n");
 
-                connected_alias = connected_users(users, num_users, &num_connected);
-                if (connected_alias == NULL){
-                        printf("s> CONNECTEDUSERS FAIL\n");
-                        sprintf(buffer, "%d", 2);
-                } 
-                else{
-                        printf("s> CONNECTEDUSERS OK\n");
+                for (i = 0; i < NUM_CONNECTEDUSERS; i++){
 
+                         // Reinicia buffer para recibir
+                        memset(buffer, 0, sizeof(buffer));
+                        // Recibe dato
+                        recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                        // Agrega el dato a la peticion (lista de strings)
+                        agregar_string(&peticion, &num_peticion, buffer);
+                        // Manda la confirmacion
+                       send(sc_copied, "OK\0", strlen("OK\0"), MSG_WAITALL);
+
+                }
+
+                // Comprobamos que usuario está conectado
+                // Primero si esta registrado
+                if (connected(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0 ||
+                    registered(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0){
+                        printf("s> Usuario no registrado\n");
                         // Envío resultado 
                         memset(send_buffer, 0, sizeof(buffer));
                         recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
                         
-                        sprintf(buffer, "%d", 0);
+                        sprintf(buffer, "%d", 1);
                         buffer[strlen(buffer)] = '\0';
                         send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-
-                        // Envío de num_connected
-                        memset(send_buffer, 0, sizeof(buffer));
-                        recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
-                        
-                        sprintf(buffer, "%d", num_connected);
-                        buffer[strlen(buffer)] = '\0';
-                        send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-
-                        for (i = 0; i < num_connected; i++){
-                                // Envío de num_connected
+                }
+                else{
+                        connected_alias = connected_users(users, num_users, &num_connected);
+                        if (connected_alias == NULL){
+                                printf("s> CONNECTEDUSERS FAIL\n");
+                                
+                                // Envío resultado 
                                 memset(send_buffer, 0, sizeof(buffer));
                                 recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                                
+                                sprintf(buffer, "%d", 0);
+                                buffer[strlen(buffer)] = '\0';
+                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+                        } 
+                        else{
+                                printf("s> CONNECTEDUSERS OK\n");
 
-                                sprintf(buffer, "%s", connected_alias[i]);
+                                // Envío resultado 
+                                memset(send_buffer, 0, sizeof(buffer));
+                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                                
+                                sprintf(buffer, "%d", 0);
                                 buffer[strlen(buffer)] = '\0';
                                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
 
-                                printf("Usuario %s\n", connected_alias[i]);
+                                // Envío de num_connected
+                                memset(send_buffer, 0, sizeof(buffer));
+                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                                
+                                sprintf(buffer, "%d", num_connected);
+                                buffer[strlen(buffer)] = '\0';
+                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+
+                                for (i = 0; i < num_connected; i++){
+                                        // Envío de num_connected
+                                        memset(send_buffer, 0, sizeof(buffer));
+                                        recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+
+                                        sprintf(buffer, "%s", connected_alias[i]);
+                                        buffer[strlen(buffer)] = '\0';
+                                        send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+
+                                        printf("Usuario %s\n", connected_alias[i]);
+                                }
+
+
+
+
                         }
 
-
-
-
                 }
-
-                
                 
         }
         else{
