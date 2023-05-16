@@ -161,7 +161,9 @@ void manage_client(int *sc){
                         default:
                                 break;
                 }
-                send(sc_copied, "\n", strlen("\n"), 0);
+                memset(send_buffer, 0, sizeof(buffer));
+                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+
                 buffer[strlen(buffer)] = '\0';
                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
 
@@ -193,7 +195,9 @@ void manage_client(int *sc){
                         default:
                                 break;
                 }
-                send(sc_copied, "\n", strlen("\n"), 0);
+                memset(send_buffer, 0, sizeof(buffer));
+                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+
                 buffer[strlen(buffer)] = '\0';
                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
         }
@@ -224,13 +228,14 @@ void manage_client(int *sc){
 
                 switch(atoi(buffer)){
                         case 0:
-                                send(sc_copied, "\n", strlen("\n"), 0);
-                                // Envio de validacion de registro
+                                memset(send_buffer, 0, sizeof(buffer));
+                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+
                                 buffer[strlen(buffer)] = '\0';
                                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
                                 
                                 memset(buffer, 0, sizeof(buffer));
-                                recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
                                 
                                 // Envio de id
                                 sprintf(send_buffer, "%u", id);

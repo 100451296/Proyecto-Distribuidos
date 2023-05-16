@@ -52,12 +52,11 @@ class client :
       
         connection.sendall("OK\0".encode())
 
-        temp_result = connection.recv(1024)
-        print('temp_res:',temp_result)
-        connection.close()
-        result = temp_result.decode("utf-8")
-        print('res:',result)
+        result = connection.recv(1024).decode("utf-8")
+        print(result)
 
+
+        connection.close()
 
         # Mensaje de resultado de conexion
         if result == "0":
@@ -83,7 +82,7 @@ class client :
         message = formatPetition(connection, client.OP_UNREGISTER, client._alias)
 
         connection.sendall("OK\0".encode())
-        
+
         result = connection.recv(1024).decode("utf-8")
         print(result)
 
@@ -177,10 +176,12 @@ class client :
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         message = formatPetition(connection, client.OP_CONNECT, client._alias, str(port))
-        resetBuffer(connection)
+        connection.sendall("OK\0".encode())
 
         result = connection.recv(1024).decode("utf-8")
         print(result)
+
+
         connection.close()
 
         if result == "0":
@@ -208,10 +209,11 @@ class client :
 
         message = formatPetition(connection,client.OP_DISCONNECT, client._alias)
         #connection.sendall(message.encode("utf-8"))
-        resetBuffer(connection)
+        connection.sendall("OK\0".encode())
 
         result = connection.recv(1024).decode("utf-8")
         print(result)
+
         connection.close()
 
         if result == "0":
@@ -246,13 +248,14 @@ class client :
 
         # Generamos petición para mandar 
         message = formatPetition(connection, client.OP_SEND, client._alias, user, message)
-        resetBuffer(connection)
+        connection.sendall("OK\0".encode())
 
         result = connection.recv(1024).decode("utf-8")
-        print(result)
 
         connection.sendall("OK\0".encode())
         id = connection.recv(1024).decode("utf-8")
+        
+        connection.close()
         
         # ******* Retroalimentación a interfaz  ******* #
         # Todo bien
@@ -263,7 +266,7 @@ class client :
         elif result == '2':
             window['_SERVER_'].print("s> SEND FAIL")
 
-        connection.close()
+        
         return client.RC.ERROR
 
     # *
