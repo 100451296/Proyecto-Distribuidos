@@ -229,11 +229,10 @@ void manage_client(int *sc){
                 }
                 if (registered(peticion[SEND_REMI], users, num_users) == 0 ||
                     registered(peticion[SEND_DEST], users, num_users) == 0){
-                        sprintf(buffer, "%d", -1); // Alguno de los dos usuarios no está registrado
+                        sprintf(buffer, "%d", 1); // Alguno de los dos usuarios no está registrado
                         printf("No estanb registrados %s , %s\n", peticion[SEND_DEST], peticion[SEND_REMI]);
                     }
                 else{
-                        printf("Actualizando id\n");
                         id = updateID(peticion[SEND_REMI], users, num_users);
                         writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]);
                         sprintf(buffer, "%d", 0);
@@ -274,8 +273,6 @@ void manage_client(int *sc){
                 }
         }
         else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
-                printf("connectedUsers\n");
-
                 for (i = 0; i < NUM_CONNECTEDUSERS; i++){
 
                          // Reinicia buffer para recibir
@@ -293,7 +290,7 @@ void manage_client(int *sc){
                 // Primero si esta registrado
                 if (connected(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0 ||
                     registered(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0){
-                        printf("s> Usuario no registrado\n");
+                        printf("s> CONNECTEDUSERS FAIL, NOT REGISTERED OR CONNECTED\n");
                         // Envío resultado 
                         memset(send_buffer, 0, sizeof(buffer));
                         recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
@@ -342,8 +339,6 @@ void manage_client(int *sc){
                                         sprintf(buffer, "%s", connected_alias[i]);
                                         buffer[strlen(buffer)] = '\0';
                                         send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-
-                                        printf("Usuario %s\n", connected_alias[i]);
                                 }
 
 
