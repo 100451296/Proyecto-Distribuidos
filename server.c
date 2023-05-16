@@ -52,7 +52,7 @@ void manage_client(int *sc){
 	recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
 
         // Envía una confirmación al cliente
-        send(sc_copied, "OK", 2, 0);
+       send(sc_copied, "OK\0", strlen("OK\0"), MSG_WAITALL);
 
         //TO DO: Funcion para comprobar que el formato de la peticion sea valido
 
@@ -81,11 +81,11 @@ void manage_client(int *sc){
                         // Agrega el dato a la peticion (lista de strings)
                         agregar_string(&peticion, &num_peticion, buffer);
                         // Manda la confirmacion
-                        send(sc_copied, "OK", 2, 0);
+                        send(sc_copied, "OK\0", strlen("OK\0"), MSG_NOSIGNAL);
                 }
                 
                 if (registered(peticion[REGISTER_ALIAS], users, num_users) == 1){
-                        sprintf(buffer, "\n%d", 1);
+                        sprintf(buffer, "%d", 1);
                 } // Usuario registrado
         
                else{
@@ -95,10 +95,10 @@ void manage_client(int *sc){
 
                         createPendingFile(peticion[REGISTER_ALIAS]);
                         
-                        sprintf(buffer, "\n%d", 0);
+                        sprintf(buffer, "%d", 0);
                 } // No se encontro un usuario igual
 
-                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
         }
 
         else if (strcmp(peticion[0], "UNREGISTER") == 0){
@@ -112,22 +112,23 @@ void manage_client(int *sc){
                         // Agrega el dato a la peticion (lista de strings)
                         agregar_string(&peticion, &num_peticion, buffer);
                         // Manda la confirmacion
-                        send(sc_copied, "OK", 2, 0);
+                       send(sc_copied, "OK\0", strlen("OK\0"), MSG_WAITALL);
                 }
 
-                if (registered(peticion[REGISTER_ALIAS], users, num_users) == 0){
-                        sprintf(buffer, "\n%d", 1);
+                if (registered(peticion[UNREGISTER_ALIAS], users, num_users) == 0){
+                        sprintf(buffer, "%d", 1);
                 } // Usuario no registrado
         
                else{
-                        remove_user(peticion[REGISTER_USERNAME], users, &num_users);
-                        deletePendingFile(peticion[REGISTER_ALIAS]);
-                        sprintf(buffer, "\n%d", 0);
+                        remove_user(peticion[UNREGISTER_ALIAS], users, &num_users);
+                        deletePendingFile(peticion[UNREGISTER_ALIAS]);
+                        sprintf(buffer, "%d", 0);
 
                         //deletePendingFile(peticion[REGISTER_ALIAS]);
                 } // Usuario borrado
 
-                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+                buffer[strlen(buffer)] = '\0';
+                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
         }
 
         else if (strcmp(peticion[0], "CONNECT") == 0){
@@ -140,23 +141,25 @@ void manage_client(int *sc){
                         // Agrega el dato a la peticion (lista de strings)
                         agregar_string(&peticion, &num_peticion, buffer);
                         // Manda la confirmacion
-                        send(sc_copied, "OK", 2, 0);
+                       send(sc_copied, "OK\0", strlen("OK\0"), MSG_WAITALL);
                 }
                 err = fill_connection(peticion[CONNECTED_ALIAS], client_ip, peticion[CONNECTED_PORT], 
                                 users, num_users, CONNECTED);
-                sprintf(buffer, "\n%d", err);
+                sprintf(buffer, "%d", err);
 
                 switch(err){
                         case 0: 
-                                printf("s> CONNECT %s OK", peticion[CONNECTED_ALIAS]);
+                                printf("s> CONNECT %s OK\n", peticion[CONNECTED_ALIAS]);
                                 break;
                         case 1:
-                                printf("s> CONNECT %s FAIL", peticion[CONNECTED_ALIAS]);
+                                printf("s> CONNECT %s FAIL\n", peticion[CONNECTED_ALIAS]);
                                 break;
                         default:
                                 break;
                 }
-                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+                send(sc_copied, "\n", strlen("\n"), 0);
+                buffer[strlen(buffer)] = '\0';
+                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
 
                 // TO DO: Enviar todos los mensajes pendientes 
         }
@@ -171,11 +174,11 @@ void manage_client(int *sc){
                         // Agrega el dato a la peticion (lista de strings)
                         agregar_string(&peticion, &num_peticion, buffer);
                         // Manda la confirmacion
-                        send(sc_copied, "OK", 2, 0);
+                       send(sc_copied, "OK\0", strlen("OK\0"), MSG_WAITALL);
                 }
                 err = fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
                                 users, num_users, DISCONNECTED);
-                sprintf(buffer, "\n%d", err);
+                sprintf(buffer, "%d", err);
 
                 switch(err){
                         case 0: 
@@ -187,8 +190,9 @@ void manage_client(int *sc){
                         default:
                                 break;
                 }
-
-                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+                send(sc_copied, "\n", strlen("\n"), 0);
+                buffer[strlen(buffer)] = '\0';
+                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
         }
 
         else if (strcmp(peticion[0], "SEND") == 0){
@@ -201,60 +205,64 @@ void manage_client(int *sc){
                         // Agrega el dato a la peticion (lista de strings)
                         agregar_string(&peticion, &num_peticion, buffer);
                         // Manda la confirmacion
-                        send(sc_copied, "OK", 2, 0);
+                       send(sc_copied, "OK\0", strlen("OK\0"), MSG_WAITALL);
                 }
                 if (registered(peticion[SEND_REMI], users, num_users) == 0 ||
                     registered(peticion[SEND_DEST], users, num_users) == 0){
-                        sprintf(buffer, "\n%d", -1); // Alguno de los dos usuarios no está registrado
+                        sprintf(buffer, "%d", -1); // Alguno de los dos usuarios no está registrado
                         printf("No estanb registrados %s , %s\n", peticion[SEND_DEST], peticion[SEND_REMI]);
                     }
                 else{
                         printf("Actualizando id\n");
                         id = updateID(peticion[SEND_REMI], users, num_users);
                         writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]);
-                        sprintf(buffer, "\n%d", 0);
+                        sprintf(buffer, "%d", 0);
                 }
 
                 switch(atoi(buffer)){
                         case 0:
-                                send(sc_copied, buffer, MAX_ALIAS_LENGTH, MSG_WAITALL);
-                                /*
-                                memset(buffer, 0, sizeof(buffer));
-                                printf("Paso a recibir\n");
-                                recv(sc_copied, buffer, 2, 0);
-                                printf("Recibo OK: %s\n", buffer);
-                                */
+                                send(sc_copied, "\n", strlen("\n"), 0);
+                                // Envio de validacion de registro
+                                buffer[strlen(buffer)] = '\0';
+                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
                                 
                                 memset(buffer, 0, sizeof(buffer));
-                                sprintf(send_buffer, "\n%u\n", id);
-                                printf("Mando ID: %s\n", send_buffer);
-                                send(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                                recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                                
+                                // Envio de id
+                                sprintf(send_buffer, "%u", id);
+                                send_buffer[strlen(send_buffer)] = '\0';
+                                send(sc_copied, send_buffer, strlen(send_buffer), 0);
+                                
+                                // Manda mensaje si está conectado
+                                if (connected(peticion[SEND_DEST], users, num_users) == CONNECTED){
+                                        // Obtiene IP y puerto e inicializa hp con información del host
+                                        getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
+                                        sendMessage(ip, port, peticion[SEND_DEST]);
 
+
+                }
                                 break;
+
                         default:
-                                send(sc_copied, buffer, MAX_LINE_LENGTH, MSG_WAITALL);
+                                buffer[strlen(buffer)] = '\0';
+                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
                                 break;
-                                
                 }
 
-                if (connected(peticion[SEND_DEST], users, num_users) == CONNECTED){
-                        // Obtiene IP y puerto e inicializa hp con información del host
-                        getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
-                        sendMessage(ip, port, peticion[SEND_DEST]);
-
-
-                }
+                
                         
                 
                 
         }
         else{
                printf("Comando desconcoido\n");
-               sprintf(buffer, "\n%d", -1); 
+               sprintf(buffer, "%d", -1); 
         }
 
         pthread_mutex_unlock(&mutex_users); // Fin sección critica users
 
+        free(client_ip);
         close(sc_copied);
         pthread_exit(0);
 }
@@ -290,7 +298,7 @@ int main(int argc, char *argv[])
         bzero((char *)&server_addr, sizeof(server_addr));
         server_addr.sin_family      = AF_INET;
         server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port        = htons(4200);
+        server_addr.sin_port        = htons(PORT);
 
         // Asigna la dirección y puerto al socket del servidor
         err = bind(sd, (const struct sockaddr *)&server_addr, sizeof(server_addr));

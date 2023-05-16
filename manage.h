@@ -4,6 +4,8 @@
 #define USERS_PATH "./files/users.txt"
 #define USERS_TEMP_PATH "./files/tmp_users.txt"
 
+#define PORT 3000
+
 #define PENDINGS_PATH "./files/pendings/"
 
 #define DELIM ":;"
@@ -24,6 +26,8 @@
 #define REGISTER_ALIAS 2
 #define REGISTER_DATE 3
 
+#define UNREGISTER_ALIAS 1
+
 #define CONNECTED_ALIAS 1
 #define CONNECTED_PORT 2
 
@@ -35,7 +39,7 @@
 
 // NUMERO PARAMETROS POR PETICION
 #define NUM_REGISTER 3
-#define NUM_UNREGISTER 3
+#define NUM_UNREGISTER 1
 #define NUM_CONNECT 2
 #define NUM_DISCONNECT 1
 #define NUM_SEND 3

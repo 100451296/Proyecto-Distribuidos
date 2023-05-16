@@ -49,18 +49,20 @@ class client :
 
         # Generamos petición para mandar 
         message = formatPetition(connection, client.OP_REGISTER, client._username, user, client._date)
-
-        resetBuffer(connection)
-        result = readString(connection)
+      
+        result = connection.recv(1024).decode("utf-8")
+        print(result)
+        
         connection.close()
 
 
         # Mensaje de resultado de conexion
         if result == "0":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " OK")
-        else:
+        elif result == "1":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " FAIL")
-        
+        else:
+            window['_SERVER_'].print("s> REGISTER FAIL CONNECTION")
         return client.RC.ERROR
 
     # *
@@ -75,17 +77,19 @@ class client :
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
-        message = formatPetition(connection, client.OP_UNREGISTER, client._username, user, client._date)
+        message = formatPetition(connection, client.OP_UNREGISTER, client._alias)
 
-        resetBuffer(connection)
-        result = readString(connection)
+        result = connection.recv(1024).decode("utf-8")
+        print(result)
+
         connection.close()
 
         if result == "0":
             window['_SERVER_'].print("s> UNREGISTER "+ client._username + " OK")
-        else:
+        elif result == "1":
             window['_SERVER_'].print("s> UNREGISTER "+ client._username + " FAIL")
-
+        else:
+            window['_SERVER_'].print("s> UNREGISTER FAIL CONNECTION")
         return client.RC.ERROR
 
     @staticmethod
@@ -100,21 +104,21 @@ class client :
             print("Mensaje:", op)
             
             if op == "SEND_MESSAGE":
-                
                 resetBuffer(conn)
                 alias = readString(conn)
+                
                 if not alias:
                     print("error en alias")
                     
                 print("Alias:", alias)
-                
+
                 resetBuffer(conn)
                 id = readString(conn)
                 if not id:
                     print("error en id")
                     
                 print("id:", id)
-                
+
                 resetBuffer(conn)
                 content = readString(conn)
                 if not content:
@@ -167,10 +171,10 @@ class client :
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         message = formatPetition(connection, client.OP_CONNECT, client._alias, str(port))
-        #connection.sendall(message.encode("utf-8"))
-
         resetBuffer(connection)
-        result = readString(connection)
+
+        result = connection.recv(1024).decode("utf-8")
+        print(result)
         connection.close()
 
         if result == "0":
@@ -180,7 +184,7 @@ class client :
         elif result == "2":
             window['_SERVER_'].print("s> USER ALREADY CONNECTED")
         else:
-            window['_SERVER_'].print("s> CONNECT FAIL")
+            window['_SERVER_'].print("s> CONNECT FAIL CONNECTION")
 
         return client.RC.ERROR
 
@@ -198,9 +202,10 @@ class client :
 
         message = formatPetition(connection,client.OP_DISCONNECT, client._alias)
         #connection.sendall(message.encode("utf-8"))
-
         resetBuffer(connection)
-        result = readString(connection)
+
+        result = connection.recv(1024).decode("utf-8")
+        print(result)
         connection.close()
 
         if result == "0":
@@ -210,7 +215,7 @@ class client :
         elif result == "2":
             window['_SERVER_'].print("s> USER NOT CONNECTED")
         else:
-            window['_SERVER_'].print("s> DISCONNECT FAIL")
+            window['_SERVER_'].print("s> DISCONNECT FAIL CONNECTION")
 
         client._connected = False
         client._thread = None
@@ -234,13 +239,14 @@ class client :
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         # Generamos petición para mandar 
-        message = formatPetition(connection, client.OP_SEND, client._username, user, message)
-
-        resetBuffer(connection)
-        result = readString(connection)
+        message = formatPetition(connection, client.OP_SEND, client._alias, user, message)
         resetBuffer(connection)
 
-        id = readString(connection)[:-1]
+        result = connection.recv(1024).decode("utf-8")
+        print(result)
+
+        connection.sendall("OK\0".encode())
+        id = connection.recv(1024).decode("utf-8")
         
         # ******* Retroalimentación a interfaz  ******* #
         # Todo bien

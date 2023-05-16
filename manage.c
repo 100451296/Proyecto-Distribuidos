@@ -87,7 +87,7 @@ int remove_user(char* username, User** user_arr, int* num_users) {
     int found = 0;
     // Buscar el usuario y eliminarlo de la lista dinámica
     for (int i = 0; i < *num_users; i++) {
-        if (strcmp(username, user_arr[i]->username) == 0) {
+        if (strcmp(username, user_arr[i]->alias) == 0) {
             free(user_arr[i]->username);
             free(user_arr[i]->alias);
             free(user_arr[i]->date);
@@ -418,9 +418,9 @@ int sendMessage(char *ip, char *port, char *dest){
     printf("Valores leidos: %s, %d, %s\n", remi, id, content);
     fflush(stdout);
 
-    sprintf(buffer_alias, "\n%s\n", remi);
-    sprintf(buffer_id, "\n%d\n", id);
-    sprintf(buffer_content, "\n%s\n", content);
+    sprintf(buffer_alias, "\n%s", remi);
+    sprintf(buffer_id, "\n%d", id);
+    sprintf(buffer_content, "\n%s", content);
 
     // Intenta conectarse 
     err = connect(sd_send, (struct sockaddr *) &server_addr, sizeof(server_addr));
@@ -430,9 +430,14 @@ int sendMessage(char *ip, char *port, char *dest){
     }
     send(sd_send, "\nSEND_MESSAGE", 1024, 0);
 
-    send(sd_send, buffer_alias, 1024, 0);
-    send(sd_send, buffer_id, 1024, 0);
-    send(sd_send, buffer_content, 1024, 0);
+    buffer_alias[strlen(buffer_alias)] = '0';
+    send(sd_send, buffer_alias, strlen(buffer_alias), 0);
+
+    buffer_id[strlen(buffer_id)] = '0';
+    send(sd_send, buffer_id, strlen(buffer_id), 0);
+
+    buffer_content[strlen(buffer_content)] = '0';
+    send(sd_send, buffer_content, strlen(buffer_content), 0);
 
 
     close(sd_send);

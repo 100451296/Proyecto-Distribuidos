@@ -28,6 +28,8 @@ def readString(sock):
             # Si se recibió el carácter nulo, se terminó de recibir el mensaje
             a = a.split('\0')[0]
             break
+        elif '\n'in msg:
+            a = a.split('\n')[0]
     return a
 
 def resetBuffer(connection):
@@ -35,8 +37,9 @@ def resetBuffer(connection):
     try:
         while True:
             data = connection.recv(1)
-            print(data)
+            
             if data == b'\n':
+                print("Reset buffer", data)
                 break
             if not data:
                 break
