@@ -56,7 +56,7 @@ class client :
         connection.sendall("OK\0".encode())
 
         result = connection.recv(1024).decode("utf-8")
-        print(result)
+        #print(result)
 
 
         connection.close()
@@ -95,7 +95,7 @@ class client :
         connection.sendall("OK\0".encode())
 
         result = connection.recv(1024).decode("utf-8")
-        print(result)
+        #print(result)
 
         connection.close()
         # Exito
@@ -114,44 +114,44 @@ class client :
 
     @staticmethod
     def handleConnection(conn, addr, window):
-        print('Conectado por', addr)
+        #print('Conectado por', addr)
         try:
             op = conn.recv(1024).decode("utf-8")
             conn.sendall("OK\0".encode())
             if not op:
                 print("error en op\n")
                 raise "Error en op"
-            print("Mensaje:", op)
+            #print("Mensaje:", op)
             
             if op == "SEND_MESSAGE":
                 
                 alias = conn.recv(1024).decode("utf-8")
                 if not alias:
-                    print("error en alias\n")
+                    print("Error en alias\n")
                     conn.sendall("ER\0".encode())
                 else:
                     conn.sendall("OK\0".encode())
                     
-                print("Alias:", alias)
+                #print("Alias:", alias)
 
                 id = conn.recv(1024).decode("utf-8")
                 if not id:
-                    print("error en id\n")
+                    print("Error en id\n")
                     conn.sendall("ER\0".encode())
                 else:
                     conn.sendall("OK\0".encode())
                     
-                print("id:", id)
+                #print("id:", id)
 
                 content = conn.recv(1024).decode("utf-8")
                 if not content:
-                    print("error en content\n")
+                    print("Error en content\n")
                     conn.sendall("ER\0".encode())
                 else:
                     conn.sendall("OK\0".encode())
                     
-                print("Content:", content)
-                window['_SERVER_'].print(f"s> MESSAGE {id} FROM {alias} {content} END")
+                #print("Content:", content)
+                window['_SERVER_'].print(f"s> MESSAGE {id} FROM {alias} \n{content} \nEND")
 
         except Exception as e:
             print("Error:", e)
@@ -201,7 +201,7 @@ class client :
         connection.sendall("OK\0".encode())
 
         result = connection.recv(1024).decode("utf-8")
-        print(result)
+        #print(result)
 
         connection.close()
         # Exito 
@@ -214,10 +214,10 @@ class client :
         elif result == "2":
             window['_SERVER_'].print("s> USER ALREADY CONNECTED")
         # Otros
-        elif result == "2":
+        elif result == "3":
             window['_SERVER_'].print("s> USER ALREADY CONNECTED")
         else:
-            window['_SERVER_'].print("s> CONNECT FAIL CONNECTION")
+            window['_SERVER_'].print("s> CONNECT FAIL UNKNOWN - " + result)
 
         return client.RC.ERROR
 
@@ -229,6 +229,8 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def disconnect(user, window):
+        # Mensaje de salida
+        print(f"c> DISCONNECT {client._username}")
 
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
@@ -238,18 +240,24 @@ class client :
         connection.sendall("OK\0".encode())
 
         result = connection.recv(1024).decode("utf-8")
-        print(result)
+        #print(result)
 
         connection.close()
 
+        # Exito 
         if result == "0":
             window['_SERVER_'].print("s> DISCONNECT " + client._username + " OK")
+        # Usuario no existe
         elif result == "1":
-            window['_SERVER_'].print("s> DISCONNECT FAIL, USER DOES NOT EXIST")
+            window['_SERVER_'].print("s> DISONNECT FAIL , USER DOES NOT EXIST")
+        # Usuario ya conectado
         elif result == "2":
-            window['_SERVER_'].print("s> USER NOT CONNECTED")
+            window['_SERVER_'].print("s> DISCONNECT FAIL , USER NOT CONNECTEDD")
+        # Otros
+        elif result == "3":
+            window['_SERVER_'].print("s> DISCONNECT FAIL")
         else:
-            window['_SERVER_'].print("s> DISCONNECT FAIL CONNECTION")
+            window['_SERVER_'].print("s> DISCONNECT FAIL UNKNOWN - " + result)
 
         client._connected = False
         client._thread = None
@@ -266,9 +274,15 @@ class client :
     # * @return ERROR the user does not exist or another error occurred
     @staticmethod
     def send(user, message, window):
+        # Formateamos mensaje con Servicio Web
+
+
+        # Mensaje de salida
+        print(f"c> SEND {client._username} {message}")
+
         # ******* Conexión de cliente con servidor  ******* #
 
-        print("Datos", user, message, "user", type(user))
+        #print("Datos", user, message, "user", type(user))
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
@@ -284,10 +298,10 @@ class client :
         if result == '0':
             connection.sendall("OK\0".encode())
             id = connection.recv(1024).decode("utf-8")
-            window['_SERVER_'].print(f"s> SEND MESSAGE {id} OK")
+            window['_SERVER_'].print(f"s> SEND MESSAGE {id}  OK")
 
         elif result == '1':
-            window['_SERVER_'].print("s> USER " + user + " DOES NOT EXIST")
+            window['_SERVER_'].print("s> SEND FAIL , USER " + user + " DOES NOT EXIST")
         elif result == '2':
             window['_SERVER_'].print("s> SEND FAIL")
 
@@ -306,13 +320,15 @@ class client :
     # * @return ERROR the user does not exist or another error occurred
     @staticmethod
     def  sendAttach(user, message, file, window):
-        window['_SERVER_'].print("s> SENDATTACH MESSAGE OK")
-        print("SEND ATTACH " + user + " " + message + " " + file)
+        #window['_SERVER_'].print("s> SENDATTACH MESSAGE OK")
+        print("SEND ATTACH ")
         #  Write your code here
         return client.RC.ERROR
 
     @staticmethod
     def  connectedUsers(window):
+        # Mensaje de salida
+        print("c> CONNECTEDUSERS")
 
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
@@ -324,7 +340,7 @@ class client :
 
         result = connection.recv(1024).decode("utf-8")
 
-        # Todo bien
+        # Exito
         if result == '0':
             connection.sendall("OK\0".encode())
             num_users = connection.recv(1024).decode("utf-8")
@@ -335,13 +351,15 @@ class client :
                 current_user = connection.recv(1024).decode("utf-8")
                 total_users += current_user + ", "
             window['_SERVER_'].print(f"s> CONNECTED USERS ({num_users} users connected) OK - {total_users}")
-
+        # No esta conectado
         elif result == '1':
             window['_SERVER_'].print("s> USER IS NOT CONNECTED")
+        # Otros
         elif result == '2':
             window['_SERVER_'].print("s> CONNECTED USERS FAIL")
+        # Unknown
         else:
-            window['_SERVER_'].print("s> CONNECTED FAIL UNKNOWN "+ result)
+            window['_SERVER_'].print("s> CONNECTED FAIL UNKNOWN - "+ result)
         return client.RC.ERROR
 
 

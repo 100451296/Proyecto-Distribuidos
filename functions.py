@@ -8,10 +8,10 @@ import time
 def formatPetition(socket, *args):
     for i in range(len(args)):
         peticion = args[i] + '\0'
-        print('pet' , peticion)
+        #print('pet' , peticion)
         res = socket.sendall(peticion.encode('utf-8'))
         confirmacion = socket.recv(1024).decode('utf-8')
-        print("Recibido", confirmacion)
+        #print("Recibido", confirmacion)
     
     return confirmacion # Se ha enviado todo el contenido
 
@@ -39,7 +39,7 @@ def resetBuffer(connection):
             data = connection.recv(1)
             
             if data == b'\n':
-                print("Reset buffer", data)
+                #print("Reset buffer", data)
                 break
             if not data:
                 break
