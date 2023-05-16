@@ -171,6 +171,7 @@ int registered(const char *alias, User **users, int num_users){
 }
 
 int connected(char *alias, User **users, int num_users){
+    
     // Devuelve 1 si el alias esta conectado y  0 en caso contrario
     int i;
 
@@ -231,6 +232,48 @@ int fill_connection(char *alias, char* ip, char *port, User **users, int num_use
     
     return 1; // Usuario no registrado
 }
+
+char** connected_users(User** users, int num_users, int* num_connected) {
+    int i;
+    int connectedCount = 0;
+    char** connectedAliases = NULL;
+
+    // Contar la cantidad de usuarios conectados
+    for (i = 0; i < num_users; i++) {
+        if (users[i]->connected == CONNECTED) {
+            connectedCount++;
+        }
+    }
+
+    // Asignar memoria inicial para el array de alias conectados
+    connectedAliases = (char**)malloc(connectedCount * sizeof(char*));
+    if (connectedAliases == NULL) {
+        // Error de asignación de memoria
+        return NULL;
+    }
+
+    int index = 0;
+    for (i = 0; i < num_users; i++) {
+        if (users[i]->connected == CONNECTED) {
+            // Copiar el alias en el array de aliases conectados
+            connectedAliases[index] = strdup(users[i]->alias);
+            if (connectedAliases[index] == NULL) {
+                // Error de asignación de memoria al copiar el alias
+                // Liberar memoria previamente asignada
+                for (int j = 0; j < index; j++) {
+                    free(connectedAliases[j]);
+                }
+                free(connectedAliases);
+                return NULL;
+            }
+            index++;
+        }
+    }
+
+    *num_connected = connectedCount;
+    return connectedAliases;
+}
+
 
 unsigned int incrementAndReset(unsigned int value) {
     if (value == UINT_MAX) {
@@ -414,11 +457,11 @@ int sendMessage(char *ip, char *port, char *dest){
     memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(atoi(port));
-    /*
+    
     if (isEmpty(dest) == -1){
         return -1;
     }
-    */
+    
     extraerUltimaLinea(dest, &id, &remi, &content);
     printf("Valores leidos: %s, %d, %s\n", remi, id, content);
     fflush(stdout);

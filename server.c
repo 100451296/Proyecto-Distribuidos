@@ -31,6 +31,8 @@ void manage_client(int *sc){
         char *port = NULL;
         int err;
         char *client_ip;
+        int num_connected;
+        char** connected_alias = NULL;
 
         pthread_mutex_lock(&mutex_socket);
         sc_copied = *sc; 
@@ -194,10 +196,10 @@ void manage_client(int *sc){
 
                 switch(err){
                         case 0: 
-                                printf("s> DISCONNECT %s OK", peticion[CONNECTED_ALIAS]);
+                                printf("s> DISCONNECT %s OK\n", peticion[CONNECTED_ALIAS]);
                                 break;
                         case 1:
-                                printf("s> DISCONNECT %s FAIL", peticion[CONNECTED_ALIAS]);
+                                printf("s> DISCONNECT %s FAIL\n", peticion[CONNECTED_ALIAS]);
                                 break;
                         default:
                                 break;
@@ -259,6 +261,9 @@ void manage_client(int *sc){
                                 break;
 
                         default:
+                                memset(send_buffer, 0, sizeof(buffer));
+                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+
                                 buffer[strlen(buffer)] = '\0';
                                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
                                 break;
@@ -266,7 +271,30 @@ void manage_client(int *sc){
         }
         else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
                 printf("connectedUsers\n");
-                // HACER FUNCION 
+
+                connected_alias = connected_users(users, num_users, &num_connected);
+                if (connected_alias == NULL){
+                        sprintf(buffer, "%d", 2);
+                } 
+                else{
+                        
+
+                        memset(send_buffer, 0, sizeof(buffer));
+                        recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                        
+                        sprintf(buffer, "%d", 0);
+                        buffer[strlen(buffer)] = '\0';
+                        send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+
+                        memset(send_buffer, 0, sizeof(buffer));
+                        recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                        
+                        sprintf(buffer, "%d", num_connected);
+                        buffer[strlen(buffer)] = '\0';
+                        send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+
+                }
+
                 
                 
         }

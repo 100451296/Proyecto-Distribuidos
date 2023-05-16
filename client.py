@@ -252,15 +252,15 @@ class client :
 
         result = connection.recv(1024).decode("utf-8")
 
-        connection.sendall("OK\0".encode())
-        id = connection.recv(1024).decode("utf-8")
-        
         connection.close()
-        
+
         # ******* Retroalimentación a interfaz  ******* #
         # Todo bien
         if result == '0':
+            connection.sendall("OK\0".encode())
+            id = connection.recv(1024).decode("utf-8")
             window['_SERVER_'].print(f"s> SEND MESSAGE {id} OK")
+
         elif result == '1':
             window['_SERVER_'].print("s> USER " + user + " DOES NOT EXIST")
         elif result == '2':
@@ -294,17 +294,16 @@ class client :
         # Formateamos petición y mandamos a servidor 
         message = formatPetition(connection, client.OP_CONNECTEDUSERS)
         #connection.sendall(message.encode("utf-8"))
-        resetBuffer(connection)
+        connection.sendall("OK\0".encode())
 
-        temp_result = connection.recv(1024)
-        print('temp_res:',temp_result)
-        connection.close()
-        result = temp_result.decode("utf-8")
-        print('res:',result)
+        result = connection.recv(1024).decode("utf-8")
 
         # Todo bien
         if result == '0':
-            window['_SERVER_'].print("s> CONNECTED USERS OK")
+            connection.sendall("OK\0".encode())
+            num_users = connection.recv(1024).decode("utf-8")
+            window['_SERVER_'].print(f"s> CONNECTED USERS OK {num_users}")
+
         elif result == '1':
             window['_SERVER_'].print("s> USER IS NOT CONNECTED")
         elif result == '2':

@@ -76,5 +76,6 @@ int extraerUltimaLinea(char *dest, int* id, char** remi, char** content);
 int sendMessage(char *ip, char *port, char *dest);
 int borrarUltimaLinea(char* dest);
 int isEmpty(char* dest);
+char** connected_users(User** users, int num_users, int* num_connected);
 
 #endif
