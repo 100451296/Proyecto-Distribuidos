@@ -163,8 +163,8 @@ void manage_client(int *sc){
                                 err = 0;
                                 while(err == 0){
                                         getUserPortIP(peticion[CONNECTED_ALIAS], &ip, &port, users, num_users);
-                                        if (sendMessage(ip, port, peticion[CONNECTED_ALIAS]) == 0)
-                                                err = borrarUltimaLinea(peticion[CONNECTED_ALIAS]);
+                                        sendMessage(ip, port, peticion[CONNECTED_ALIAS]);
+                                        err = borrarUltimaLinea(peticion[CONNECTED_ALIAS]);
                                 }
                                 break;
                         case 1:

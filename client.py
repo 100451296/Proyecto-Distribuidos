@@ -45,7 +45,6 @@ class client :
     @staticmethod
     def register(user, window):
         # Mensaje de salida
-        window['_CLIENT_'].print("c> REGISTER "+ client._username)
         print(f"c> REGISTER {client._username}")
 
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
@@ -86,7 +85,6 @@ class client :
     @staticmethod
     def  unregister(user, window):
         # Mensaje de salida
-        window['_CLIENT_'].print("c> UNREGISTER "+ client._username)
         print(f"UNREGISTER {client._username}")
         
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
@@ -184,14 +182,11 @@ class client :
     @staticmethod
     def connect(user, window):
         # Mensaje de salida
-        window['_CLIENT_'].print("c> CONNECT "+ client._username)
-        print(f"CONNECT {client._username}")
+        print(f"c> CONNECT {client._username}")
 
         socketMessages = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socketMessages.bind(('localhost', 0)) # 0: que busque puerto disponible
         host, port = socketMessages.getsockname()
-        print("host:", host)
-        print("port:", port)
         
         if client._thread == None:
             client._connected = True
@@ -207,7 +202,6 @@ class client :
 
         result = connection.recv(1024).decode("utf-8")
         print(result)
-
 
         connection.close()
         # Exito 
