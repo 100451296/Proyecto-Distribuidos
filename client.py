@@ -22,8 +22,8 @@ class client :
     _server = None
     _port = -1
     _quit = 0
-    _username = "edu"
-    _alias = "edu"
+    _username = None
+    _alias = None
     _date = "1/1/1"
     _server_addres = None
     _connected = True
