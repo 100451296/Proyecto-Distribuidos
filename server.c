@@ -41,7 +41,6 @@ void manage_client(int *sc){
         pthread_cond_signal(&cond_copied);
         pthread_mutex_unlock(&mutex_socket);
 
-        printf("Cliente conectado\n");
         // Comprobacion socket
 	if (sc_copied == -1){
                 perror("El socket no se pudo abrir correctamente\n");
@@ -87,6 +86,7 @@ void manage_client(int *sc){
                 
                 if (registered(peticion[REGISTER_ALIAS], users, num_users) == 1){
                         sprintf(buffer, "%d", 1);
+                        printf("s> REGISTER %s FAIL\n", peticion[REGISTER_ALIAS]);
                 } // Usuario registrado
         
                else{
@@ -97,6 +97,7 @@ void manage_client(int *sc){
                         createPendingFile(peticion[REGISTER_ALIAS]);
                         
                         sprintf(buffer, "%d", 0);
+                        printf("s> REGISTER %s OK\n", peticion[REGISTER_ALIAS]);
                 } // No se encontro un usuario igual
                 memset(send_buffer, 0, sizeof(buffer));
                 recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
@@ -121,12 +122,14 @@ void manage_client(int *sc){
 
                 if (registered(peticion[UNREGISTER_ALIAS], users, num_users) == 0){
                         sprintf(buffer, "%d", 1);
+                        printf("s> UNREGISTER %s FAIL\n", peticion[UNREGISTER_ALIAS]);
                 } // Usuario no registrado
         
                else{
                         remove_user(peticion[UNREGISTER_ALIAS], users, &num_users);
                         deletePendingFile(peticion[UNREGISTER_ALIAS]);
                         sprintf(buffer, "%d", 0);
+                        printf("s> UNREGISTER %s OK\n", peticion[UNREGISTER_ALIAS]);
 
                         //deletePendingFile(peticion[REGISTER_ALIAS]);
                 } // Usuario borrado
@@ -160,8 +163,8 @@ void manage_client(int *sc){
                                 err = 0;
                                 while(err == 0){
                                         getUserPortIP(peticion[CONNECTED_ALIAS], &ip, &port, users, num_users);
-                                        sendMessage(ip, port, peticion[CONNECTED_ALIAS]);
-                                        err = borrarUltimaLinea(peticion[CONNECTED_ALIAS]);
+                                        if (sendMessage(ip, port, peticion[CONNECTED_ALIAS]) == 0)
+                                                err = borrarUltimaLinea(peticion[CONNECTED_ALIAS]);
                                 }
                                 break;
                         case 1:

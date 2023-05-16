@@ -495,24 +495,37 @@ int sendMessage(char *ip, char *port, char *dest){
 
     memset(buffer, 0, sizeof(buffer));
     recv(sd_send, buffer, MAX_LINE_LENGTH, 0);
+    if (strcmp(buffer, "OK") != 0)
+        return -1;
 
     buffer_alias[strlen(buffer_alias)] = '\0';
     send(sd_send, buffer_alias, strlen(buffer_alias), 0);
 
     memset(buffer, 0, sizeof(buffer));
     recv(sd_send, buffer, MAX_LINE_LENGTH, 0);
+    if (strcmp(buffer, "OK") != 0)
+        return -1;
 
     buffer_id[strlen(buffer_id)] = '\0';
     send(sd_send, buffer_id, strlen(buffer_id), 0);
 
     memset(buffer, 0, sizeof(buffer));
     recv(sd_send, buffer, MAX_LINE_LENGTH, 0);
+    if (strcmp(buffer, "OK") != 0)
+        return -1;
 
     buffer_content[strlen(buffer_content)] = '\0';
     send(sd_send, buffer_content, strlen(buffer_content), 0);
 
+    memset(buffer, 0, sizeof(buffer));
+    recv(sd_send, buffer, MAX_LINE_LENGTH, 0);
+    if (strcmp(buffer, "OK") != 0)
+        return -1;
+
+
 
     close(sd_send);
+    printf("s> SEND MESSAGE %d FROM %s TO %s\n", id, remi, dest);
     //borrarUltimaLinea(dest);
     return 0;
 }
