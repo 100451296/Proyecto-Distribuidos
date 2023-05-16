@@ -10,6 +10,21 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <ctype.h>
+
+int isNumber(const char* str) {
+    // Verificar si el string es un número válido
+    int i = 0;
+    if (str[0] == '-') {
+        i = 1;
+    }
+    for (; str[i] != '\0'; i++) {
+        if (!isdigit(str[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 User **read_users_from_file(int *num_users) {
     FILE *fp = fopen(USERS_PATH, "r");

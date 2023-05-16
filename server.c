@@ -372,6 +372,16 @@ int main(int argc, char *argv[])
         pthread_t thid;
         pthread_attr_t t_attr;
 
+        // Verificar si se proporcionó el argumento -p y su valor
+        if (argc < 3 || strcmp(argv[1], "-p") != 0 || !isNumber(argv[2])) {
+                printf("Uso: ./server -p <numero>\n");
+                return 1;
+        }
+
+        // Obtener el valor del número asociado a -p
+        int port = atoi(argv[2]);
+        printf("Número de puerto: %d\n", port);
+
         users = read_users_from_file(&num_users);
 
         // Inicializa el socket del servidor con el tipo de conexion
@@ -393,7 +403,7 @@ int main(int argc, char *argv[])
         bzero((char *)&server_addr, sizeof(server_addr));
         server_addr.sin_family      = AF_INET;
         server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port        = htons(PORT);
+        server_addr.sin_port        = htons(port);
 
         printf("server port: %d\n", server_addr.sin_port);
 

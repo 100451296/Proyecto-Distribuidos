@@ -57,6 +57,7 @@ typedef struct User {
     unsigned int id;
 } User;
 
+int isNumber(const char* str);
 char **split_fields(char *message);
 User **read_users_from_file(int *num_users);
 int add_user(const char *new_username, const char *new_alias, const char *new_date, User **user_arr, int *num_users);
