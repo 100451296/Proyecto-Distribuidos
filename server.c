@@ -96,8 +96,8 @@ void manage_client(int *sc){
                         
                         sprintf(buffer, "%d", 0);
                 } // No se encontro un usuario igual
-                memset(buffer, 0, sizeof(buffer));
-                recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                memset(send_buffer, 0, sizeof(buffer));
+                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
 
                 buffer[strlen(buffer)] = '\0';
                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
@@ -128,8 +128,8 @@ void manage_client(int *sc){
 
                         //deletePendingFile(peticion[REGISTER_ALIAS]);
                 } // Usuario borrado
-                memset(buffer, 0, sizeof(buffer));
-                recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
+                memset(send_buffer, 0, sizeof(buffer));
+                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
 
                 buffer[strlen(buffer)] = '\0';
                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
