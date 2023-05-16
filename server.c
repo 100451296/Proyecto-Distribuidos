@@ -245,7 +245,8 @@ void manage_client(int *sc){
                                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
                                 break;
                 }
-         else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
+        }
+        else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
                 printf("connectedUsers\n");
                 // HACER FUNCION 
                 

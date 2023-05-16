@@ -389,6 +389,7 @@ int sendMessage(char *ip, char *port, char *dest){
     char buffer_alias[1024];
     char buffer_id[1024];
     char buffer_content[1024];
+    char buffer[MAX_LINE_LENGTH];
 
     // Inicializa el descriptor de socket
     sd_send = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -418,9 +419,9 @@ int sendMessage(char *ip, char *port, char *dest){
     printf("Valores leidos: %s, %d, %s\n", remi, id, content);
     fflush(stdout);
 
-    sprintf(buffer_alias, "\n%s", remi);
-    sprintf(buffer_id, "\n%d", id);
-    sprintf(buffer_content, "\n%s", content);
+    sprintf(buffer_alias, "%s", remi);
+    sprintf(buffer_id, "%d", id);
+    sprintf(buffer_content, "%s", content);
 
     // Intenta conectarse 
     err = connect(sd_send, (struct sockaddr *) &server_addr, sizeof(server_addr));
@@ -428,15 +429,24 @@ int sendMessage(char *ip, char *port, char *dest){
             printf("Error en connect\n");
             exit(1);
     }
-    send(sd_send, "\nSEND_MESSAGE", 1024, 0);
+    send(sd_send, "SEND_MESSAGE\0", strlen("SEND_MESSAGE\0"), 0);
 
-    buffer_alias[strlen(buffer_alias)] = '0';
+    memset(buffer, 0, sizeof(buffer));
+    recv(sd_send, buffer, MAX_LINE_LENGTH, 0);
+
+    buffer_alias[strlen(buffer_alias)] = '\0';
     send(sd_send, buffer_alias, strlen(buffer_alias), 0);
 
-    buffer_id[strlen(buffer_id)] = '0';
+    memset(buffer, 0, sizeof(buffer));
+    recv(sd_send, buffer, MAX_LINE_LENGTH, 0);
+
+    buffer_id[strlen(buffer_id)] = '\0';
     send(sd_send, buffer_id, strlen(buffer_id), 0);
 
-    buffer_content[strlen(buffer_content)] = '0';
+    memset(buffer, 0, sizeof(buffer));
+    recv(sd_send, buffer, MAX_LINE_LENGTH, 0);
+
+    buffer_content[strlen(buffer_content)] = '\0';
     send(sd_send, buffer_content, strlen(buffer_content), 0);
 
 

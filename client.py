@@ -102,31 +102,30 @@ class client :
     def handleConnection(conn, addr, window):
         print('Conectado por', addr)
         try:
-            resetBuffer(conn)
-            op = readString(conn)
+            op = conn.recv(1024).decode("utf-8")
+            conn.sendall("OK\0".encode())
             if not op:
                 print("error en op")
                 raise "Error en op"
             print("Mensaje:", op)
             
             if op == "SEND_MESSAGE":
-                resetBuffer(conn)
-                alias = readString(conn)
                 
+                alias = conn.recv(1024).decode("utf-8")
+                conn.sendall("OK\0".encode())
                 if not alias:
                     print("error en alias")
                     
                 print("Alias:", alias)
 
-                resetBuffer(conn)
-                id = readString(conn)
+                id = conn.recv(1024).decode("utf-8")
+                conn.sendall("OK\0".encode())
                 if not id:
                     print("error en id")
                     
                 print("id:", id)
 
-                resetBuffer(conn)
-                content = readString(conn)
+                content = conn.recv(1024).decode("utf-8")
                 if not content:
                     print("error en content")
                     
