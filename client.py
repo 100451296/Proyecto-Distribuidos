@@ -275,10 +275,14 @@ class client :
     # * @return ERROR the user does not exist or another error occurred
     @staticmethod
     def send(user, message, window):
-        # Formateamos mensaje con Servicio Web
-        response = requests.post('http://localhost:4222/normal_text', data={'message': message})
-        formatted_message = response.text
-        message = formatted_message
+
+        try:
+            # Formateamos mensaje con Servicio Web
+            response = requests.post('http://localhost:4222/normal_text', data={'message': message})
+            formatted_message = response.text
+            message = formatted_message
+        except Exception as e:
+            print("Debes iniciar el servicio web, ejecuta: python3 web-service.py (en Ubuntu)")
 
 
         # Mensaje de salida
