@@ -284,7 +284,11 @@ class client :
         except Exception as e:
             print("Debes iniciar el servicio web, ejecuta: python3 web-service.py (en Ubuntu)")
 
-
+        # Longitud maxima de mensaje 256 (contenido + \0)
+        if len(message) > 256:
+            window['_CLIENT_'].print("c> SEND FAIL, TOO LONG MESSAGE")
+            return client.RC.ERROR
+        
         # Mensaje de salida
         print(f"c> SEND {client._username} {message}")
 

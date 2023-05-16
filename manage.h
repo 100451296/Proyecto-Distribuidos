@@ -80,5 +80,7 @@ int sendMessage(char *ip, char *port, char *dest);
 int borrarUltimaLinea(char* dest);
 int isEmpty(char* dest);
 char** connected_users(User** users, int num_users, int* num_connected);
+int recvField(int sc_copied, char ***peticion, int *num_peticion);
+int sendResponse(int sc_copied, char *buffer);
 
 #endif

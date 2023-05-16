@@ -66,6 +66,56 @@ User **read_users_from_file(int *num_users) {
     return user_arr;
 }
 
+int recvField(int sc_copied, char ***peticion, int *num_peticion){
+    
+    char buffer[MAX_LINE_LENGTH];
+    
+    // Reinicia buffer para recibir
+    memset(buffer, 0, sizeof(buffer));
+
+    // Recibe dato
+    if (recv(sc_copied, buffer, MAX_LINE_LENGTH, 0) < 0){
+        printf("Error al recibir\n");
+        return -1;
+    }
+    // Agrega el dato a la peticion (lista de strings)
+    if (agregar_string(peticion, num_peticion, buffer) < 0){
+        printf("Error al añadir cadena a peticion\n");
+        return -1;
+    }
+    // Manda la confirmacion
+    if (send(sc_copied, "OK\0", strlen("OK\0"), MSG_WAITALL) < 0){
+        printf("Error al enviar\n");
+        return -1;
+    }
+
+    return 0;
+    
+}
+
+int sendResponse(int sc_copied, char *buffer){
+
+    char recv_buffer[MAX_LINE_LENGTH];
+
+    // Reinicia buffer
+    memset(recv_buffer, 0, sizeof(recv_buffer));
+
+    // Recibe confirmacion para enviar
+    if (recv(sc_copied, recv_buffer, MAX_LINE_LENGTH, 0) < 0){
+        printf("Error al recibir\n");
+        return -1;
+    }
+
+    // Envia repuesta
+    buffer[strlen(buffer)] = '\0';
+    if (send(sc_copied, buffer, strlen(buffer), MSG_WAITALL) < 0){
+        printf("Error al enviar\n");
+        return -1;
+    }
+    
+    return 0;
+}
+
 int add_user(const char *new_username, const char *new_alias, const char *new_date, User **user_arr, int *num_users) {
     // Actualiza el archivo de usuarios
     FILE *fp = fopen(USERS_PATH, "a+");
@@ -90,11 +140,11 @@ int add_user(const char *new_username, const char *new_alias, const char *new_da
     if (*num_users < MAX_USERS) {
         user_arr[*num_users] = new_user;
         (*num_users)++;
-        return 1;
+        return 0;
     } else {
         // Si se excede el numero maximo de usuarios, libera la memoria del usuario nuevo
         free(new_user);
-        return 0;
+        return -1;
     }
 }
 
@@ -126,7 +176,7 @@ int remove_user(char* username, User** user_arr, int* num_users) {
         FILE* f = fopen(USERS_PATH, "w");
         if (f == NULL) {
             printf("Error opening file!\n");
-            exit(1);
+            return -1;
         }
         
         // Escribir los usuarios restantes en el archivo
@@ -141,6 +191,7 @@ int remove_user(char* username, User** user_arr, int* num_users) {
         printf("User not found.\n");
         return -1;
     }
+
 }
 
 int updateUsers(User **user_arr, int num_users){
