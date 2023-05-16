@@ -252,7 +252,7 @@ class client :
             window['_SERVER_'].print("s> DISONNECT FAIL , USER DOES NOT EXIST")
         # Usuario ya conectado
         elif result == "2":
-            window['_SERVER_'].print("s> DISCONNECT FAIL , USER NOT CONNECTEDD")
+            window['_SERVER_'].print("s> DISCONNECT FAIL , USER NOT CONNECTED")
         # Otros
         elif result == "3":
             window['_SERVER_'].print("s> DISCONNECT FAIL")
