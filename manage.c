@@ -414,7 +414,11 @@ int sendMessage(char *ip, char *port, char *dest){
     memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(atoi(port));
-
+    /*
+    if (isEmpty(dest) == -1){
+        return -1;
+    }
+    */
     extraerUltimaLinea(dest, &id, &remi, &content);
     printf("Valores leidos: %s, %d, %s\n", remi, id, content);
     fflush(stdout);
@@ -455,7 +459,7 @@ int sendMessage(char *ip, char *port, char *dest){
     return 0;
 }
 
-void borrarUltimaLinea(char* dest) {
+int borrarUltimaLinea(char* dest) {
     char nombreArchivo[100];
     snprintf(nombreArchivo, sizeof(nombreArchivo), "%s%s.txt", PENDINGS_PATH, dest);
     printf("Abriendo archivo: %s\n", nombreArchivo);
@@ -463,37 +467,75 @@ void borrarUltimaLinea(char* dest) {
     FILE* archivo = fopen(nombreArchivo, "r");
     if (archivo == NULL) {
         printf("Error al abrir el archivo.\n");
-        return;
+        return -1;
     }
 
+    // Verificar si el archivo está vacío
+    fseek(archivo, 0, SEEK_END);
+    if (ftell(archivo) == 0) {
+        fclose(archivo);
+        return -1;
+    }
+
+    // Crear un archivo temporal para escribir el contenido sin la última línea
     FILE* archivoTemp = fopen("temp.txt", "w");
     if (archivoTemp == NULL) {
         printf("Error al abrir el archivo temporal.\n");
         fclose(archivo);
-        return;
+        return -1;
     }
+
+    fseek(archivo, 0, SEEK_SET); // Mover el puntero al inicio del archivo
 
     char buffer[1024];
     char ultimaLinea[1024];
     ultimaLinea[0] = '\0';
+    int primeraLinea = 1;
 
     // Leer el archivo línea por línea y guardar la última línea en un buffer separado
     while (fgets(buffer, sizeof(buffer), archivo) != NULL) {
-        strcpy(ultimaLinea, buffer);
-    }
-
-    // Volver a escribir el archivo omitiendo la última línea
-    fseek(archivo, 0, SEEK_SET);
-    while (fgets(buffer, sizeof(buffer), archivo) != NULL) {
-        if (strcmp(buffer, ultimaLinea) != 0) {
-            fputs(buffer, archivoTemp);
+        if (!primeraLinea) {
+            fputs(ultimaLinea, archivoTemp);
         }
+        strcpy(ultimaLinea, buffer);
+        primeraLinea = 0;
     }
 
     fclose(archivo);
     fclose(archivoTemp);
 
+    // Si solo había una línea en el archivo, se elimina el archivo temporal sin cambios
+    if (primeraLinea) {
+        remove("temp.txt");
+        return -1;
+    }
+
     // Renombrar el archivo temporal como el archivo original
     remove(nombreArchivo);
     rename("temp.txt", nombreArchivo);
+
+    return 0;
+}
+
+int isEmpty(char* dest){
+
+    char nombreArchivo[100];
+    snprintf(nombreArchivo, sizeof(nombreArchivo), "%s%s.txt", PENDINGS_PATH, dest);
+    printf("Abriendo archivo: %s\n", nombreArchivo);
+
+    FILE* archivo = fopen(nombreArchivo, "r");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return -1;
+    }
+
+    // Verificar si el archivo está vacío
+    fseek(archivo, 0, SEEK_END);
+    if (ftell(archivo) == 0) {
+        fclose(archivo);
+        return -1;
+    }
+
+    fclose(archivo);
+    return 0;
 }

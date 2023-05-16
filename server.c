@@ -154,6 +154,13 @@ void manage_client(int *sc){
                 switch(err){
                         case 0: 
                                 printf("s> CONNECT %s OK\n", peticion[CONNECTED_ALIAS]);
+                                
+                                err = 0;
+                                while(err == 0){
+                                        getUserPortIP(peticion[CONNECTED_ALIAS], &ip, &port, users, num_users);
+                                        sendMessage(ip, port, peticion[CONNECTED_ALIAS]);
+                                        err = borrarUltimaLinea(peticion[CONNECTED_ALIAS]);
+                                }
                                 break;
                         case 1:
                                 printf("s> CONNECT %s FAIL\n", peticion[CONNECTED_ALIAS]);

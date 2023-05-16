@@ -74,6 +74,7 @@ int updateUsers();
 int getUserPortIP(char *alias, char **ip, char **port, User **users, int num_users);
 int extraerUltimaLinea(char *dest, int* id, char** remi, char** content);
 int sendMessage(char *ip, char *port, char *dest);
-void borrarUltimaLinea(char* dest);
+int borrarUltimaLinea(char* dest);
+int isEmpty(char* dest);
 
 #endif
