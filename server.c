@@ -167,7 +167,7 @@ void manage_client(int *sc){
 
                 if (err == 0){
                         err_conn = fill_connection(peticion[CONNECTED_ALIAS], client_ip, peticion[CONNECTED_PORT], 
-                                                   users, num_users, CONNECTED);
+                                                   users, num_users, CONNECTED); // Cambia estado a conectado y guarda ip y port para mandar mensajes
                         sprintf(buffer, "%d", err_conn);
 
                         switch(err_conn){
@@ -196,83 +196,122 @@ void manage_client(int *sc){
                         sprintf(buffer, "%d", 3);
                 } // Fallo recepcion
                 
+                // Envio de resulado 
                 sendResponse(sc_copied, buffer);
-
-                // TO DO: Enviar todos los mensajes pendientes 
         }
 
         else if (strcmp(peticion[0], "DISCONNECT") == 0){
                 for (i = 0; i < NUM_DISCONNECT; i++){
-                        err = recvField(sc_copied, &peticion, &num_peticion);                }
-                err_conn = fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
-                                users, num_users, DISCONNECTED);
-                sprintf(buffer, "%d", err);
+                        // Recibe campo y copia en peticion
+                        err = recvField(sc_copied, &peticion, &num_peticion);    
+                        if (err == -1){
+                                printf("Error al recibir algún campo\n");
+                        }           
+                }
+                if (err == 0){
+                        err_conn = fill_connection(peticion[CONNECTED_ALIAS], NULL, NULL, 
+                                                   users, num_users, DISCONNECTED); // Cambia estado a desconectado
+                        sprintf(buffer, "%d", err_conn);
 
-                switch(err_conn){
-                        case 0: 
-                                printf("s> DISCONNECT %s OK\n", peticion[CONNECTED_ALIAS]);
+                        switch(err_conn){
+                        case 0: // Operacion realizada con exito
+                                printf("s> DISCONNECT %s OK\n", peticion[CONNECTED_ALIAS]); 
                                 break;
-                        case 1:
+                        case 1: // Usuario no registrado
+                                printf("s> DISCONNECT %s FAIL, USER NOT REGISTERED\n", peticion[CONNECTED_ALIAS]);
+                                break;
+                        case 2: // Usuario ya conectado
+                                printf("s> DISCONNECT %s FAIL, USER ALREADY CONNECTED\n", peticion[CONNECTED_ALIAS]);
+                                break;
+                        default: // Fallo desconocido
                                 printf("s> DISCONNECT %s FAIL\n", peticion[CONNECTED_ALIAS]);
                                 break;
-                        default:
-                                break;
                 }
-                memset(send_buffer, 0, sizeof(buffer));
-                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                } // Recepcion exitosa
 
-                buffer[strlen(buffer)] = '\0';
-                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+                else{
+                        sprintf(buffer, "%d", 3);
+                } // Fallo recepcion
+                
+                sendResponse(sc_copied, buffer);
         }
 
         else if (strcmp(peticion[0], "SEND") == 0){
                 for (i = 0; i < NUM_SEND; i++){
-                        err = recvField(sc_copied, &peticion, &num_peticion);                }
-                if (registered(peticion[SEND_REMI], users, num_users) == 0 ||
-                    registered(peticion[SEND_DEST], users, num_users) == 0){
-                        sprintf(buffer, "%d", 1); // Alguno de los dos usuarios no está registrado
-                        printf("No estanb registrados %s , %s\n", peticion[SEND_DEST], peticion[SEND_REMI]);
-                    }
+                        // Recibe campo y copia en peticion
+                        err = recvField(sc_copied, &peticion, &num_peticion);    
+                        if (err == -1){
+                                printf("Error al recibir algún campo\n");
+                        }                 
+                }
+
+                if (err == 0){
+                        if (registered(peticion[SEND_REMI], users, num_users) == 0 ||
+                            registered(peticion[SEND_DEST], users, num_users) == 0) 
+                        {
+                                sprintf(buffer, "%d", 1); 
+                        } // Alguno de los usuarios no esta registrado
+                        else{
+                                id = updateID(peticion[SEND_REMI], users, num_users);
+                                if (writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]) < 0) // Error de escritura en archivo
+                                        sprintf(buffer, "%d", 2);
+                                else
+                                        sprintf(buffer, "%d", 0); // Mensaje escrito con exito
+                        } // Intenta escribir mensajes en archivo
+
+                        switch(atoi(buffer)){ // Comprueba que sucedio en la operacion
+
+                                case 0: // Comprobaciones exitosas, procede enviar
+                                        sendResponse(sc_copied, buffer); // Envio de resultado
+                                
+                                       
+                                        sprintf(send_buffer, "%u", id);
+                                        sendResponse(sc_copied, send_buffer);  // Envio de id
+                                        
+                                        // Manda mensaje a destinatario si está conectado
+                                        if (connected(peticion[SEND_DEST], users, num_users) == CONNECTED){
+
+                                                // Obtiene IP y puerto e inicializa hp con información del host
+                                                getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
+
+                                                if (sendMessage(ip, port, peticion[SEND_DEST]) < 0){
+                                                        // No se pudo mandar pero se almacena
+                                                        printf("s> SEND MESSAGE %u %s TO %s STORED\n", id, peticion[SEND_REMI], peticion[SEND_DEST]); 
+                                                } // Intenta mandar mensaje
+                                                else{
+                                                        borrarUltimaLinea(peticion[SEND_DEST]); // Borra mensaje del archivo
+                                                } // Envio exitoso
+                                                
+                                        }
+                                        else{ 
+                                                break;
+                                        }
+                                                                              
+                                        break;
+
+                                case 1:
+                                        printf("s> SEND MESSAGE %s OR %s IS NOT REGISTERED\n", peticion[SEND_REMI], peticion[SEND_DEST]);
+                                        break;
+                                
+                                case 2:
+                                        printf("s> SEND MESSAGE %u %s TO %s FAIL\n", id, peticion[SEND_REMI], peticion[SEND_DEST]); 
+                                        break;
+                                default:
+                                        sprintf(buffer, "%d", 2);
+                                        printf("s> SEND MESSAGE %u %s TO %s FAIL\n", id, peticion[SEND_REMI], peticion[SEND_DEST]); 
+                                        break;
+                        }
+                }// Recepcion exitosa
+
                 else{
-                        id = updateID(peticion[SEND_REMI], users, num_users);
-                        writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]);
-                        sprintf(buffer, "%d", 0);
-                }
+                        sprintf(buffer, "%d", 2);
+                        printf("s> SEND MESSAGE FAIL\n"); 
+                } // Fallo en la recepcion
 
-                switch(atoi(buffer)){
-                        case 0:
-                                memset(send_buffer, 0, sizeof(buffer));
-                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                sendResponse(sc_copied, buffer);
+        } 
 
-                                buffer[strlen(buffer)] = '\0';
-                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-                                
-                                memset(buffer, 0, sizeof(buffer));
-                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
-                                
-                                // Envio de id
-                                sprintf(send_buffer, "%u", id);
-                                send_buffer[strlen(send_buffer)] = '\0';
-                                send(sc_copied, send_buffer, strlen(send_buffer), 0);
-                                
-                                // Manda mensaje si está conectado
-                                if (connected(peticion[SEND_DEST], users, num_users) == CONNECTED){
-                                        // Obtiene IP y puerto e inicializa hp con información del host
-                                        getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
-                                        sendMessage(ip, port, peticion[SEND_DEST]);
-                                        borrarUltimaLinea(peticion[SEND_DEST]);
-                }
-                                break;
-
-                        default:
-                                memset(send_buffer, 0, sizeof(buffer));
-                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
-
-                                buffer[strlen(buffer)] = '\0';
-                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-                                break;
-                }
-        }
+                
         else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
                 for (i = 0; i < NUM_CONNECTEDUSERS; i++){
                         err = recvField(sc_copied, &peticion, &num_peticion);
