@@ -7,8 +7,8 @@ import time
 
 def formatPetition(socket, *args):
     for i in range(len(args)):
-        peticion = args[i] + "\0"
-        print(peticion)
+        peticion = args[i] + '\0'
+        print('pet' , peticion)
         res = socket.sendall(peticion.encode('utf-8'))
         confirmacion = socket.recv(1024).decode('utf-8')
         print("Recibido", confirmacion)
@@ -28,7 +28,7 @@ def readString(sock):
             # Si se recibió el carácter nulo, se terminó de recibir el mensaje
             a = a.split('\0')[0]
             break
-        elif '\n'in msg:
+        elif '\n' in msg:
             a = a.split('\n')[0]
     return a
 

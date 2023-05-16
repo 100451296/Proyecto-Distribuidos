@@ -33,6 +33,7 @@ class client :
     OP_CONNECT = 'CONNECT'
     OP_DISCONNECT = 'DISCONNECT'
     OP_SEND = 'SEND'
+    OP_CONNECTEDUSERS = 'CONNECTEDUSERS' 
 
     # ******************** METHODS *******************
     # *
@@ -43,17 +44,22 @@ class client :
     # * @return ERROR if another error occurred
     @staticmethod
     def register(user, window):
-
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
         connection.connect(client._server_addres) # Conectamos el socket al servidor
 
         # Generamos petición para mandar 
         message = formatPetition(connection, client.OP_REGISTER, client._username, user, client._date)
       
-        result = connection.recv(1024).decode("utf-8")
-        print(result)
+        # result = connection.recv(1024).decode()
+        # print('res' ,result)
         
+        # connection.close()
+
+        temp_result = connection.recv(1024)
+        print('temp_res:',temp_result)
         connection.close()
+        result = temp_result.decode("utf-8")
+        print('res:',result)
 
 
         # Mensaje de resultado de conexion
@@ -62,7 +68,7 @@ class client :
         elif result == "1":
             window['_SERVER_'].print("s> REGISTER "+ client._username + " FAIL")
         else:
-            window['_SERVER_'].print("s> REGISTER FAIL CONNECTION")
+            window['_SERVER_'].print("s> REGISTER FAIL CONNECTION res: " + result )
         return client.RC.ERROR
 
     # *
@@ -160,6 +166,8 @@ class client :
         socketMessages = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socketMessages.bind(('localhost', 0)) # 0: que busque puerto disponible
         host, port = socketMessages.getsockname()
+        print("host:", host)
+        print("port:", port)
         
         if client._thread == None:
             client._connected = True
@@ -278,8 +286,30 @@ class client :
 
     @staticmethod
     def  connectedUsers(window):
-        window['_SERVER_'].print("s> CONNECTED USERS OK")
-        #  Write your code here
+
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Crea el socket
+        connection.connect(client._server_addres) # Conectamos el socket al servidor
+
+        # Formateamos petición y mandamos a servidor 
+        message = formatPetition(connection, client.OP_CONNECTEDUSERS)
+        #connection.sendall(message.encode("utf-8"))
+        resetBuffer(connection)
+
+        temp_result = connection.recv(1024)
+        print('temp_res:',temp_result)
+        connection.close()
+        result = temp_result.decode("utf-8")
+        print('res:',result)
+
+        # Todo bien
+        if result == '0':
+            window['_SERVER_'].print("s> CONNECTED USERS OK")
+        elif result == '1':
+            window['_SERVER_'].print("s> USER IS NOT CONNECTED")
+        elif result == '2':
+            window['_SERVER_'].print("s> CONNECTED USERS FAIL")
+        else:
+            window['_SERVER_'].print("s> CONNECTED FAIL UNKNOWN res"+ result)
         return client.RC.ERROR
 
 
@@ -436,8 +466,6 @@ class client :
             elif (event == 'CONNECTED USERS'):
                 window['_CLIENT_'].print("c> CONNECTEDUSERS")
                 client.connectedUsers(window)
-
-
 
             window.Refresh()
 

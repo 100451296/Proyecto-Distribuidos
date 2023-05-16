@@ -63,7 +63,6 @@ void manage_client(int *sc){
                 printf("Se envió un petición vacía");
                 close(sc_copied);
                 pthread_exit(0);
-          
         }
 
         // Inicio seccion critica para acceder a users
@@ -168,7 +167,6 @@ void manage_client(int *sc){
                 for (i = 0; i < NUM_DISCONNECT; i++){
                         // Reinicia buffer para recibir
                         memset(buffer, 0, sizeof(buffer));
-
                         // Recibe dato
                         recv(sc_copied, buffer, MAX_LINE_LENGTH, 0);
                         // Agrega el dato a la peticion (lista de strings)
@@ -239,8 +237,6 @@ void manage_client(int *sc){
                                         // Obtiene IP y puerto e inicializa hp con información del host
                                         getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
                                         sendMessage(ip, port, peticion[SEND_DEST]);
-
-
                 }
                                 break;
 
@@ -249,9 +245,9 @@ void manage_client(int *sc){
                                 send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
                                 break;
                 }
-
-                
-                        
+         else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
+                printf("connectedUsers\n");
+                // HACER FUNCION 
                 
                 
         }
@@ -299,6 +295,8 @@ int main(int argc, char *argv[])
         server_addr.sin_family      = AF_INET;
         server_addr.sin_addr.s_addr = INADDR_ANY;
         server_addr.sin_port        = htons(PORT);
+
+        printf("server port: %d\n", server_addr.sin_port);
 
         // Asigna la dirección y puerto al socket del servidor
         err = bind(sd, (const struct sockaddr *)&server_addr, sizeof(server_addr));
