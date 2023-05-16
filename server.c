@@ -274,11 +274,13 @@ void manage_client(int *sc){
 
                 connected_alias = connected_users(users, num_users, &num_connected);
                 if (connected_alias == NULL){
+                        printf("s> CONNECTEDUSERS FAIL\n");
                         sprintf(buffer, "%d", 2);
                 } 
                 else{
-                        
+                        printf("s> CONNECTEDUSERS OK\n");
 
+                        // Envío resultado 
                         memset(send_buffer, 0, sizeof(buffer));
                         recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
                         
@@ -286,12 +288,28 @@ void manage_client(int *sc){
                         buffer[strlen(buffer)] = '\0';
                         send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
 
+                        // Envío de num_connected
                         memset(send_buffer, 0, sizeof(buffer));
                         recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
                         
                         sprintf(buffer, "%d", num_connected);
                         buffer[strlen(buffer)] = '\0';
                         send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+
+                        for (i = 0; i < num_connected; i++){
+                                // Envío de num_connected
+                                memset(send_buffer, 0, sizeof(buffer));
+                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+
+                                sprintf(buffer, "%s", connected_alias[i]);
+                                buffer[strlen(buffer)] = '\0';
+                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+
+                                printf("Usuario %s\n", connected_alias[i]);
+                        }
+
+
+
 
                 }
 

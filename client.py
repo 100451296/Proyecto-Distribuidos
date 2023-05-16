@@ -302,7 +302,13 @@ class client :
         if result == '0':
             connection.sendall("OK\0".encode())
             num_users = connection.recv(1024).decode("utf-8")
-            window['_SERVER_'].print(f"s> CONNECTED USERS OK {num_users}")
+            total_users = ""
+
+            for _ in range(int(num_users)):
+                connection.sendall("OK\0".encode())
+                current_user = connection.recv(1024).decode("utf-8")
+                total_users += current_user + ", "
+            window['_SERVER_'].print(f"s> CONNECTED USERS ({num_users} users connected) OK - {total_users}")
 
         elif result == '1':
             window['_SERVER_'].print("s> USER IS NOT CONNECTED")
