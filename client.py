@@ -24,7 +24,7 @@ class client :
     _quit = 0
     _username = None
     _alias = None
-    _date = "1/1/1"
+    _date = None
     _server_addres = None
     _connected = True
     _thread = None
