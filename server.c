@@ -251,6 +251,11 @@ void manage_client(int *sc){
                         {
                                 sprintf(buffer, "%d", 1); 
                         } // Alguno de los usuarios no esta registrado
+
+                        else if (connected(peticion[SEND_REMI], users, num_users) == 0){
+                                sprintf(buffer, "%d", 2); 
+                        } // Usuario no conectado
+
                         else{
                                 id = updateID(peticion[SEND_REMI], users, num_users);
                                 if (writePendingMessage(peticion[SEND_DEST], peticion[SEND_REMI], id, peticion[SEND_CONTENT]) < 0) // Error de escritura en archivo
@@ -314,75 +319,65 @@ void manage_client(int *sc){
                 
         else if (strcmp(peticion[0], "CONNECTEDUSERS") == 0){
                 for (i = 0; i < NUM_CONNECTEDUSERS; i++){
-                        err = recvField(sc_copied, &peticion, &num_peticion);
+                        // Recibe campo y copia en peticion
+                        err = recvField(sc_copied, &peticion, &num_peticion);    
+                        if (err == -1){
+                                printf("Error al recibir algún campo\n");
+                        }  
                 }
 
-                // Comprobamos que usuario está conectado
-                // Primero si esta registrado
-                if (connected(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0 ||
-                    registered(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0){
-                        printf("s> CONNECTEDUSERS FAIL, NOT REGISTERED OR CONNECTED\n");
-                        // Envío resultado 
-                        memset(send_buffer, 0, sizeof(buffer));
-                        recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
-                        
-                        sprintf(buffer, "%d", 1);
-                        buffer[strlen(buffer)] = '\0';
-                        send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-                }
-                else{
-                        connected_alias = connected_users(users, num_users, &num_connected);
-                        if (connected_alias == NULL){
-                                printf("s> CONNECTEDUSERS FAIL\n");
+                if (err == 0){
+                        // Comprobamos que usuario está conectado y registrado
+                        if (connected(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0 ||
+                            registered(peticion[CONNECTEDUSERS_ALIAS], users, num_users) == 0){
+
+                                printf("s> CONNECTEDUSERS FAIL, NOT REGISTERED OR CONNECTED\n");
                                 
                                 // Envío resultado 
-                                memset(send_buffer, 0, sizeof(buffer));
-                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
-                                
-                                sprintf(buffer, "%d", 0);
-                                buffer[strlen(buffer)] = '\0';
-                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-                        } 
+                                sprintf(buffer, "%d", 1);
+                                sendResponse(sc_copied, buffer);
+                        }
                         else{
-                                printf("s> CONNECTEDUSERS OK\n");
+                                connected_alias = connected_users(users, num_users, &num_connected);
+                                if (connected_alias == NULL){
+                                        printf("s> CONNECTEDUSERS FAIL\n");
+                                        
+                                        // Envío resultado 
+                                        sprintf(buffer, "%d", 2);
+                                        sendResponse(sc_copied, buffer);
+                                } 
+                                else{
+                                        printf("s> CONNECTEDUSERS OK\n");
 
-                                // Envío resultado 
-                                memset(send_buffer, 0, sizeof(buffer));
-                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
-                                
-                                sprintf(buffer, "%d", 0);
-                                buffer[strlen(buffer)] = '\0';
-                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+                                        // Envio de resultado
+                                        sprintf(buffer, "%d", 0);
+                                        sendResponse(sc_copied, buffer);
 
-                                // Envío de num_connected
-                                memset(send_buffer, 0, sizeof(buffer));
-                                recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
-                                
-                                sprintf(buffer, "%d", num_connected);
-                                buffer[strlen(buffer)] = '\0';
-                                send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
-
-                                for (i = 0; i < num_connected; i++){
                                         // Envío de num_connected
-                                        memset(send_buffer, 0, sizeof(buffer));
-                                        recv(sc_copied, send_buffer, MAX_LINE_LENGTH, 0);
+                                        sprintf(buffer, "%d", num_connected);
+                                        sendResponse(sc_copied, buffer);
 
-                                        sprintf(buffer, "%s", connected_alias[i]);
-                                        buffer[strlen(buffer)] = '\0';
-                                        send(sc_copied, buffer, strlen(buffer), MSG_WAITALL);
+                                        for (i = 0; i < num_connected; i++){
+                                                // Envío de num_connected
+                                                sprintf(buffer, "%s", connected_alias[i]);
+                                                sendResponse(sc_copied, buffer);
+                                        }
                                 }
 
-
-
-
                         }
+                } // Recepcion exitosa
+                else{
+                        sprintf(buffer, "%d", 2);
+                        sendResponse(sc_copied, buffer);
+                } // Error de recepcion
 
-                }
+                
                 
         }
         else{
-               printf("Comando desconcoido\n");
+               printf("s> CODIGO DE OPERACION desconcido\n");
                sprintf(buffer, "%d", -1); 
+               sendResponse(sc_copied, buffer);
         }
 
         pthread_mutex_unlock(&mutex_users); // Fin sección critica users
