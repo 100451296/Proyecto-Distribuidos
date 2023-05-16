@@ -93,13 +93,13 @@ int remove_user(char* username, User** user_arr, int* num_users) {
             free(user_arr[i]->date);
             free(user_arr[i]->ip);
             free(user_arr[i]->port);
-            free(user_arr[i]);
             
             // Mover los elementos restantes de la lista un espacio hacia atrás
             for (int j = i + 1; j < *num_users; j++) {
                 user_arr[j - 1] = user_arr[j];
             }
             
+            free(user_arr[*num_users - 1]); // Liberar la memoria para el último elemento
             (*num_users)--;
             found = 1;
             break;
