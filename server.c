@@ -247,6 +247,7 @@ void manage_client(int *sc){
                                         // Obtiene IP y puerto e inicializa hp con información del host
                                         getUserPortIP(peticion[SEND_DEST], &ip, &port, users, num_users);
                                         sendMessage(ip, port, peticion[SEND_DEST]);
+                                        borrarUltimaLinea(peticion[SEND_DEST]);
                 }
                                 break;
 

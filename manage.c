@@ -456,32 +456,44 @@ int sendMessage(char *ip, char *port, char *dest){
 }
 
 void borrarUltimaLinea(char* dest) {
-
     char nombreArchivo[100];
     snprintf(nombreArchivo, sizeof(nombreArchivo), "%s%s.txt", PENDINGS_PATH, dest);
     printf("Abriendo archivo: %s\n", nombreArchivo);
 
-    FILE* archivo = fopen(nombreArchivo, "r+");
+    FILE* archivo = fopen(nombreArchivo, "r");
     if (archivo == NULL) {
         printf("Error al abrir el archivo.\n");
         return;
     }
 
-    // Buscar el final del archivo
-    fseek(archivo, 0, SEEK_END);
-    long tamañoArchivo = ftell(archivo);
+    FILE* archivoTemp = fopen("temp.txt", "w");
+    if (archivoTemp == NULL) {
+        printf("Error al abrir el archivo temporal.\n");
+        fclose(archivo);
+        return;
+    }
 
-    // Buscar el inicio de la última línea
-    long posición = tamañoArchivo;
-    while (posición > 0) {
-        fseek(archivo, --posición, SEEK_SET);
-        if (fgetc(archivo) == '\n') {
-            break;
+    char buffer[1024];
+    char ultimaLinea[1024];
+    ultimaLinea[0] = '\0';
+
+    // Leer el archivo línea por línea y guardar la última línea en un buffer separado
+    while (fgets(buffer, sizeof(buffer), archivo) != NULL) {
+        strcpy(ultimaLinea, buffer);
+    }
+
+    // Volver a escribir el archivo omitiendo la última línea
+    fseek(archivo, 0, SEEK_SET);
+    while (fgets(buffer, sizeof(buffer), archivo) != NULL) {
+        if (strcmp(buffer, ultimaLinea) != 0) {
+            fputs(buffer, archivoTemp);
         }
     }
 
-    // Truncar el archivo en la posición de la última línea
-    ftruncate(fileno(archivo), posición);
-
     fclose(archivo);
+    fclose(archivoTemp);
+
+    // Renombrar el archivo temporal como el archivo original
+    remove(nombreArchivo);
+    rename("temp.txt", nombreArchivo);
 }
